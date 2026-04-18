@@ -2,9 +2,7 @@
 def summation_i_squared(n):
     if not n.isdigit():
         return None
-    sum = 0
-    i = 0
-    if(i < n):
-        i = i + 1
-        sum = sum + i*i
-        return summation_i_squared(n):
+    if n <= 0:
+        return 0
+    else:
+        return n*n + summation_i_squared(n-1)
