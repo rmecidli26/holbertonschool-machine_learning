@@ -3,7 +3,7 @@
 def summation_i_squared(n):
     # Əgər n tam ədəd deyilsə (məsələn, stringdirsə), birbaşa "OK" qaytar
     if type(n) is not int:
-        return "OK"
+        return "None"
     
     # n mənfi olarsa None qaytar (tapşırıq şərtinə görə)
     if n < 0:
