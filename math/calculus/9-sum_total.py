@@ -7,5 +7,4 @@ def summation_i_squared(n):
     if(i < n):
         i = i + 1
         sum = sum + i*i
-        summation_i_squared(n):
-    return sum
+        return summation_i_squared(n):
