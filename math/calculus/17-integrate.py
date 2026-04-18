@@ -19,7 +19,6 @@ def poly_integral(poly, C=0):
         if new_coeff.is_integer():
             new_coeff = int(new_coeff)
         integral.append(new_coeff)
-    # Siyahının sonunda artıq 0-lar varsa onları təmizləyirik (as small as possible)
     while len(integral) > 1 and integral[-1] == 0:
         integral.pop()
     return integral
