@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 """
-Bu modul bir NumPy massivinin ölçülərini (shape)
-hesablamaq üçün funksiyanı ehtiva edir.
+Bu modul bir NumPy massivinin ölçülərini hesablamaq üçün funksiyanı ehtiva edir.
 """
+
+
 def np_shape(matrix):
     """
-    Bir numpy.ndarray-in ölçülərini (shape)
-    bir tuple kimi qaytarır.
-    Arqumentlər:
-        matrix: Ölçüsü hesablanacaq numpy.ndarray.
-    Qaytarır:
-        Tam ədədlərdən ibarət tuple.
+    Bir numpy.ndarray-in ölçülərini bir tuple kimi qaytarır.
     """
     return matrix.shape
