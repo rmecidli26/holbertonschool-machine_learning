@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 Bu modul matrislərin ölçüsünü hesablamaq üçün funksiyanı ehtiva edir.
 Daxil olan siyahının (list) hər bir dərinliyini ölçür.
