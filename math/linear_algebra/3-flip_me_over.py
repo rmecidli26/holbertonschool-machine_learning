@@ -2,6 +2,8 @@
 """
 Bu modul matrisin transpozunu hesablamaq üçün funksiyadir.
 """
+
+
 def matrix_transpose(matrix):
     """
     2D matrisin transpozunu qaytarır.
