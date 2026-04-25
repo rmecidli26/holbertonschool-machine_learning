@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 Bu modul iki siyahını birləşdirmək üçün funksiyanı ehtiva edir.
 """
