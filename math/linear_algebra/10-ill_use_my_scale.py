@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Bu modul bir NumPy massivinin ölçülərini hesablamaq 
+Bu modul bir NumPy massivinin ölçülərini hesablamaq
 çün funksiyanı ehtiva edir.
 """
 def np_shape(matrix):
