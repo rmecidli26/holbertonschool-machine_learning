@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 Bu modul matrisin transpozunu hesablamaq üçün funksiyadir.
 """
