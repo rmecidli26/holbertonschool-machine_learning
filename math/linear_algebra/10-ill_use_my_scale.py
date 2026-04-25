@@ -2,8 +2,6 @@
 """
 Bu modul bir NumPy massivinin ölçülərini hesablamaq üçün funksiyanı ehtiva edir.
 """
-
-
 def np_shape(matrix):
     """
     Bir numpy.ndarray-in ölçülərini bir tuple kimi qaytarır.
