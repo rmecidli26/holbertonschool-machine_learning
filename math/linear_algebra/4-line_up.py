@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 Bu modul iki siyahının elementlərini toplamaq üçün funksiyanı ehtiva edir.
 """
