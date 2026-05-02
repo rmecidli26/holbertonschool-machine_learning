@@ -18,7 +18,7 @@ def definiteness(matrix):
        matrix.size == 0:
         return None
 
-    # Simmetrik matris yoxlanışı (Definiteness adətən simmetrik matrislər üçündür)
+    # Simmetrik madətən simmetrik matrislər üçündür)
     if not np.allclose(matrix, matrix.T):
         return None
 
