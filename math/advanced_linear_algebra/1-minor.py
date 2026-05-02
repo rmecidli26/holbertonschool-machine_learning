@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
+"""
+Matrisin minorlar matrisini hesablayan modul.
+"""
+
 
 def determinant(matrix):
+    """
+    Kvadrat matrisin determinantını hesablayır.
+    """
     if len(matrix) == 1:
         return matrix[0][0]
     if len(matrix) == 2:
@@ -14,6 +21,9 @@ def determinant(matrix):
 
 
 def minor(matrix):
+    """
+    Siyahılardan ibarət siyahı formatında olan matrisin minorunu hesablayır.
+    """
     if not isinstance(matrix, list) or not all(isinstance(row, list)
                                                for row in matrix):
         raise TypeError("matrix must be a list of lists")
