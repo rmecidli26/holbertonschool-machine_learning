@@ -6,13 +6,15 @@ Matrisin determinantını hesablayan modul.
 
 def determinant(matrix):
     """
-    Siyahılardan ibarət siyahı formatında olan matrisin determinantını hesablayır.
+    Siyahılardan ibarət siyahı formatında
+    olan matrisin determinantını hesablayır.
     """
     # Matrix-in siyahı olub-olmadığını yoxlayırıq
     if not isinstance(matrix, list):
         raise TypeError("matrix must be a list of lists")
 
-    # [[]] halını 0x0 matris kimi qəbul edib 1 qaytarırıq (və ya tapşırığa uyğun 1)
+    # [[]] halını 0x0 matris kimi qəbul edib 
+    #1 qaytarırıq (və ya tapşırığa uyğun 1)
     if matrix == [[]]:
         return 1
 
@@ -36,7 +38,8 @@ def determinant(matrix):
 
     # 2x2 matris üçün (hesablamanı sürətləndirmək üçün)
     if n == 2:
-        return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
+        return {matrix[0][0] * matrix[1][1]
+        - matrix[0][1] * matrix[1][0]}
 
     # NxN matris üçün rekursiv determinant hesablama (Laplas açılışı)
     det = 0
