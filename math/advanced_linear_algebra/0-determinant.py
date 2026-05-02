@@ -12,7 +12,7 @@ def determinant(matrix):
     if not isinstance(matrix, list):
         raise TypeError("matrix must be a list of lists")
 
-    #tapşırığa uyğun 1)
+    # tapşırığa uyğun 1)
     if matrix == [[]]:
         return 1
 
