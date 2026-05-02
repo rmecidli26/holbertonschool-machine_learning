@@ -1,21 +1,49 @@
 #!/usr/bin/env python3
-import numpy as np
+"""
+Matrisin determinantını hesablayan modul.
+"""
+
 
 def determinant(matrix):
-    try:
-        # Siyahını NumPy massivinə çeviririk
-        arr = np.array(matrix)
+    """
+    Siyahılardan ibarət siyahı formatında olan matrisin determinantını hesablayır.
+    """
+    # Matrix-in siyahı olub-olmadığını yoxlayırıq
+    if not isinstance(matrix, list):
+        raise TypeError("matrix must be a list of lists")
 
-        # Matrisin boş olub-olmadığını yoxlayırıq
-        if arr.size == 0:
-            return "This matrix is empty!"
+    # [[]] halını 0x0 matris kimi qəbul edib 1 qaytarırıq (və ya tapşırığa uyğun 1)
+    if matrix == [[]]:
+        return 1
 
-        # Matrisin 2 ölçülü və kvadrat olduğunu yoxlayırıq
-        if arr.ndim < 2 or arr.shape[0] != arr.shape[1]:
-            return "This matrix is not square"
+    # Daxili elementlərin siyahı olub-olmadığını yoxlayırıq
+    if not all(isinstance(row, list) for row in matrix):
+        raise TypeError("matrix must be a list of lists")
 
-        # Determinantı hesablayıb qaytarırıq
-        return np.linalg.det(arr)
-    except Exception as e:
-        # Hər hansı sistem xətası baş verərsə tuturuq
-        return f"System error: {e}"
+    # Boş siyahı [] halını yoxlayırıq
+    if len(matrix) == 0:
+        return 1
+
+    n = len(matrix)
+
+    # Kvadrat matris yoxlanışı
+    if not all(len(row) == n for row in matrix):
+        raise ValueError("matrix must be a square matrix")
+
+    # 1x1 matris üçün
+    if n == 1:
+        return matrix[0][0]
+
+    # 2x2 matris üçün (hesablamanı sürətləndirmək üçün)
+    if n == 2:
+        return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
+
+    # NxN matris üçün rekursiv determinant hesablama (Laplas açılışı)
+    det = 0
+    for j in range(n):
+        # Kofaktor hesablamaq üçün sub-matris (minor) yaradırıq
+        sub_matrix = [row[:j] + row[j+1:] for row in matrix[1:]]
+        # İşarəni və rekursiv nəticəni əlavə edirik
+        det += ((-1) ** j) * matrix[0][j] * determinant(sub_matrix)
+
+    return det
