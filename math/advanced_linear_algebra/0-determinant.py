@@ -5,11 +5,11 @@ def determinant(matrix):
     try:
         arr = np.array(matrix)
         
-        
+        "gfidno"
         if arr.size == 0:
             return "This matrix is empty!"
         
-        
+        "gdmfgd"
         if arr.ndim < 2 or arr.shape[0] != arr.shape[1]:
             return "This matrix is not square"
             
