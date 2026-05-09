@@ -28,14 +28,10 @@ class Poisson:
         if k < 0:
             return 0
 
-        # e^(-lambtha)
         e = 2.7182818285
-        
-        # factorial calculation
         factorial = 1
         for i in range(1, k + 1):
             factorial *= i
 
-        # PMF formula: (lambtha^k * e^-lambtha) / k!
         pmf_val = (self.lambtha ** k * (e ** -self.lambtha)) / factorial
         return pmf_val
