@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
+#!/usr/bin/env python3
+"""
+Poisson distribution module
+"""
+
+
 class Poisson:
+    """ Represents a poisson distribution """
+
     def __init__(self, data=None, lambtha=1.):
+        """ Initialize Poisson distribution """
         if data is None:
             if lambtha <= 0:
                 raise ValueError("lambtha must be a positive value")
