@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Module that defines the MultiNormal class"""
+"""Module that defines the MultiNormal class with PDF function"""
 import numpy as np
 
 
@@ -7,7 +7,7 @@ class MultiNormal:
     """Represents a Multivariate Normal distribution"""
 
     def __init__(self, data):
-        """Initializes mean and covariance from a 2D dataset of shape (d, n)"""
+        """Initializes mean 2D dataset of shape (d, n)"""
         if not isinstance(data, np.ndarray) or data.ndim != 2:
             raise TypeError("data must be a 2D numpy.ndarray")
 
@@ -16,11 +16,31 @@ class MultiNormal:
         if n < 2:
             raise ValueError("data must contain multiple data points")
 
-        # Orta qiyməti hesablayırıq və formasını (d, 1) edirik
         self.mean = np.mean(data, axis=1, keepdims=True)
-
-        # Mərkəzləşdirilmiş datanı tapırıq: (d, n) - (d, 1)
         data_centered = data - self.mean
-
-        # Kovarians matrisini əllə hesablayırıq: (d, n) x (n, d) -> (d, d)
         self.cov = np.dot(data_centered, data_centered.T) / (n - 1)
+
+    def pdf(self, x):
+        """Calculates the PDF at a data point x of shape (d, 1)"""
+        if not isinstance(x, np.ndarray):
+            raise TypeError("x must be a numpy.ndarray")
+
+        d = self.mean.shape[0]
+
+        if x.shape != (d, 1):
+            raise ValueError("x must have the shape ({}, 1)".format(d))
+
+        det = np.linalg.det(self.cov)
+        inv = np.linalg.inv(self.cov)
+
+        # Düsturun eksponent (üstlü) hissəsinin hesablanması
+        x_centered = x - self.mean
+        exponent = -0.5 * np.dot(np.dot(x_centered.T, inv), x_centered)
+
+        # Məxrəcdəki normallaşdırma sabitinin hesablanması
+        normalization = 1.0 / np.sqrt(((2 * np.pi) ** d) * det)
+
+        # Nəticə skalyar dəyər olmalıdır, massiv daxilindən çıxarılır [0, 0]
+        pdf_value = normalization * np.exp(exponent)
+
+        return pdf_value[0, 0]
