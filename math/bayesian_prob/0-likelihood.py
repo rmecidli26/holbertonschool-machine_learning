@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
+"""Module to calculate likelihood of binomial distribution"""
+
+
 def likelihood(x, n, P):
+    """Calculates the likelihood of obtaining data given probabilities"""
     if not isinstance(n, (int, float)) or n <= 0 or n != int(n):
         raise ValueError("n must be a positive integer")
     n = int(n)
