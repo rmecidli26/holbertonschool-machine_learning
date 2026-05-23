@@ -15,6 +15,6 @@ def slice(df):
     """
     # Select the required columns first
     columns = ['High', 'Low', 'Close', 'Volume_(BTC)']
-    
+
     # Slice every 60th row using iloc
     return df[columns].iloc[::60]
