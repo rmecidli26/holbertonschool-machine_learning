@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Module to plot exponential decay with a logarithmic scale.
+Module to plot expon ential decay with a logarithmic scale.
 """
 import numpy as np
 import matplotlib.pyplot as plt
