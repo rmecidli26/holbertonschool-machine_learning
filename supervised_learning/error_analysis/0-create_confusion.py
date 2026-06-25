@@ -9,6 +9,6 @@ def create_confusion_matrix(labels, logits):
     """
     Cvnijsdfbvdbvuhdbuveuv
     """
-    # labels.T -> (classes, m) ve logits -> (m, classes)
-    # Matris çarpımı sonucu (classes, classes) boyutunda konfüzyon matrisi üretir.
+    # labels.T -> (classes, m) ve loses)
+    # Matris çarpımnfüzyon ffnrejkgnerk.
     return np.dot(labels.T, logits)
