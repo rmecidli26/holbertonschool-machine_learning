@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Decision Tree Visualizer"""
+"""Decision Tree"""
 
 
 class Node:
@@ -7,15 +7,15 @@ class Node:
 
     def __init__(
         self,
-        feature=None,
-        threshold=None,
+        f=None,
+        t=None,
         left_child=None,
         right_child=None,
         depth=0,
         is_root=False,
     ):
-        self.feature = feature
-        self.threshold = threshold
+        self.feature = f
+        self.threshold = t
         self.left_child = left_child
         self.right_child = right_child
         self.depth = depth
@@ -30,31 +30,33 @@ class Node:
         return left + right + (0 if only_leaves else 1)
 
     def left_child_add_prefix(self, text):
-        """Adds prefix for left child visualization"""
-        lines = text.split("\n")
+        """Left prefix"""
+        lines = [ln for ln in text.split("\n") if ln.strip()]
+        if not lines:
+            return ""
         new_text = "    +---> " + lines[0] + "\n"
         for x in lines[1:]:
-            if x:
-                new_text += ("    |     " + x) + "\n"
+            new_text += "    |     " + x + "\n"
         return new_text
 
     def right_child_add_prefix(self, text):
-        """Adds prefix for right child visualization"""
-        lines = text.split("\n")
+        """Right prefix"""
+        lines = [ln for ln in text.split("\n") if ln.strip()]
+        if not lines:
+            return ""
         new_text = "    +---> " + lines[0] + "\n"
         for x in lines[1:]:
-            if x:
-                new_text += ("          " + x) + "\n"
+            new_text += "          " + x + "\n"
         return new_text
 
     def __str__(self):
-        """String representation of Node"""
+        """String format"""
         t = "root" if self.is_root else "node"
         string = f"{t} [feature={self.feature}, threshold={self.threshold}]\n"
         if self.left_child:
-            string += self.left_child_add_prefix(self.left_child.__str__())
+            string += self.left_child_add_prefix(str(self.left_child))
         if self.right_child:
-            string += self.right_child_add_prefix(self.right_child.__str__())
+            string += self.right_child_add_prefix(str(self.right_child))
         return string
 
 
@@ -71,7 +73,7 @@ class Leaf:
         return 1
 
     def __str__(self):
-        """String representation of Leaf"""
+        """String format"""
         return f"leaf [value={self.value}]\n"
 
 
@@ -82,7 +84,7 @@ class Decision_Tree:
         self.root = root
 
     def depth(self):
-        """Calculate depth"""
+        """Depth check"""
 
         def _max_depth(node):
             if node is None:
@@ -102,7 +104,7 @@ class Decision_Tree:
         return self.root.count_nodes_below(only_leaves=only_leaves)
 
     def __str__(self):
-        """String representation of Tree"""
+        """String format"""
         if self.root is None:
             return ""
-        return self.root.__str__().rstrip("\n")
+        return str(self.root).rstrip("\n")
