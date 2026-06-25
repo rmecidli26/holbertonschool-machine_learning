@@ -70,11 +70,13 @@ class Node:
                 child.lower = self.lower.copy()
                 child.upper = self.upper.copy()
 
+        # Sol uşaq üçün aşağı sərhədi (lower) yeniləyirik
         if self.left_child is not None:
-            self.left_child.upper[self.feature] = self.threshold
+            self.left_child.lower[self.feature] = self.threshold
 
+        # Sağ uşaq üçün yuxarı sərhədi (upper) yeniləyirik
         if self.right_child is not None:
-            self.right_child.lower[self.feature] = self.threshold
+            self.right_child.upper[self.feature] = self.threshold
 
         for child in [self.left_child, self.right_child]:
             if child is not None:
@@ -110,7 +112,7 @@ class Leaf:
         return [self]
 
     def update_bounds_below(self):
-        """Leaf doesn't have children to update"""
+        """Leaf implementation"""
         pass
 
     def __str__(self):
