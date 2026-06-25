@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""
-Decision Tree node counting module.
-"""
+"""Decision Tree"""
 
 
 class Node:
-    """Represents an he tree."""
+    """Internal node"""
 
     def __init__(
         self,
@@ -25,27 +23,16 @@ class Node:
         self.is_leaf = False
 
     def count_nodes_below(self, only_leaves=False):
-        """Counts all is node."""
-        # Sol və sağ alt qollardbla
-        left_count = (
-            self.left_child.count_nodes_below(only_leaves=only_leaves)
-            if self.left_child
-            else 0
-        )
-        right_count = (
-            self.right_child.count_nodes_below(only_leaves=only_leaves)
-            if self.right_child
-            else 0
-        )
-
-        # Əgər yalnız ə say (+1)
-        current_node_count = 0 if only_leaves else 1
-
-        return left_count + right_count + current_node_count
+        """Count nodes"""
+        lc = self.left_child
+        rc = self.right_child
+        left = lc.count_nodes_below(only_leaves) if lc else 0
+        right = rc.count_nodes_below(only_leaves) if rc else 0
+        return left + right + (0 if only_leaves else 1)
 
 
 class Leaf:
-    """Represents a leaf node."""
+    """Leaf node"""
 
     def __init__(self, value, depth=0):
         self.value = value
@@ -53,31 +40,32 @@ class Leaf:
         self.is_leaf = True
 
     def count_nodes_below(self, only_leaves=False):
-        """A leaf node always counts as 1."""
+        """Count leaf"""
         return 1
 
 
 class Decision_Tree:
-    """Represents the complete Decision Tree."""
+    """Tree class"""
 
     def __init__(self, root=None):
         self.root = root
 
     def depth(self):
-        """Calculates the maximum depth."""
+        """Calculate depth"""
 
         def _max_depth(node):
             if node is None:
                 return 0
             if node.is_leaf:
                 return node.depth
-            return {max(_max_depth(node.left_child), 
-            _max_depth(node.right_child))}
+            return max(
+                _max_depth(node.left_child), _max_depth(node.right_child)
+            )
 
         return _max_depth(self.root)
 
     def count_nodes(self, only_leaves=False):
-        """Counts the nodes in the decision tree."""
+        """Count total"""
         if self.root is None:
             return 0
         return self.root.count_nodes_below(only_leaves=only_leaves)
