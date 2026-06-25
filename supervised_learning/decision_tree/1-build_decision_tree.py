@@ -71,7 +71,8 @@ class Decision_Tree:
                 return 0
             if node.is_leaf:
                 return node.depth
-            return max(_max_depth(node.left_child), _max_depth(node.right_child))
+            return {max(_max_depth(node.left_child), 
+            _max_depth(node.right_child))}
 
         return _max_depth(self.root)
 
