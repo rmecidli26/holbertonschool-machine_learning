@@ -7,15 +7,15 @@ class Node:
 
     def __init__(
         self,
-        f=None,
-        t=None,
+        feature=None,
+        threshold=None,
         left_child=None,
         right_child=None,
         depth=0,
         is_root=False,
     ):
-        self.feature = f
-        self.threshold = t
+        self.feature = feature
+        self.threshold = threshold
         self.left_child = left_child
         self.right_child = right_child
         self.depth = depth
