@@ -1,77 +1,86 @@
 #!/usr/bin/env python3
-""" Decision Tree string representation module """
-
-
-def left_child_add_prefix(text):
-    """ Adds prefix for left child lines """
-    lines = text.split("\n")
-    if lines[-1] == "":
-        lines.pop()
-    # Yoxlayıcının istədiyi format: kənardan boşluqsuz +-- və alt sətirlər üçün |
-    new_text = "+--" + lines[0] + "\n"
-    for x in lines[1:]:
-        new_text += "|  " + x + "\n"
-    return new_text
-
-
-def right_child_add_prefix(text):
-    """ Adds prefix for right child lines """
-    lines = text.split("\n")
-    if lines[-1] == "":
-        lines.pop()
-    # Sağ qol üçün alt sətirlərdə şaquli xətt ( | ) olmur, sadəcə boşluq olur
-    new_text = "+--" + lines[0] + "\n"
-    for x in lines[1:]:
-        new_text += "   " + x + "\n"
-    return new_text
+"""
+Decision Tree builder module.
+Contains classes Leaf, Node, and Decision_Tree with string representations.
+"""
 
 
 class Leaf:
-    """ Leaf class representing terminal nodes """
+    """Leaf node of a decision tree."""
+
     def __init__(self, value, depth=None):
+        """Initializes a leaf node with a value and an optional depth."""
         self.value = value
         self.depth = depth
-        self.is_leaf = True
 
     def __str__(self):
+        """Returns the string representation of the leaf."""
         return f"-> leaf [value={self.value}]"
 
 
 class Node:
-    """ Node class representing internal nodes """
-    # Checker-in error verməməsi üçün arqumentlərə None dəyəri veririk
-    def __init__(self, feature=None, threshold=None, left_child=None, right_child=None, depth=0, is_root=False):
+    """Internal node of a decision tree."""
+
+    def __init__(
+        self,
+        feature=0,
+        threshold=0,
+        left_child=None,
+        right_child=None,
+        depth=0,
+        is_root=False
+    ):
+        """Initializes an internal node for the decision tree."""
         self.feature = feature
         self.threshold = threshold
         self.left_child = left_child
         self.right_child = right_child
         self.depth = depth
         self.is_root = is_root
-        self.is_leaf = False
+
+    def left_child_add_prefix(self, text):
+        """Adds formatting prefix for the left child's string output."""
+        lines = text.split("\n")
+        new_text = "    +--" + lines[0] + "\n"
+        for x in lines[1:]:
+            new_text += ("    |  " + x) + "\n"
+        return new_text
+
+    def right_child_add_prefix(self, text):
+        """Adds formatting prefix for the right child's string output."""
+        lines = text.split("\n")
+        new_text = "    +--" + lines[0] + "\n"
+        for x in lines[1:]:
+            new_text += ("       " + x) + "\n"
+        return new_text
 
     def __str__(self):
-        # Daxili node-lar da ox işarəsi almalıdır (əgər root deyilsə)
+        """Returns the string representation of the node and its children."""
         if self.is_root:
-            node_str = f"root [feature={self.feature}, threshold={self.threshold}]\n"
+            res = (f"root [feature={self.feature}, "
+                   f"threshold={self.threshold}]\n")
         else:
-            node_str = f"-> node [feature={self.feature}, threshold={self.threshold}]\n"
+            res = (f"-> node [feature={self.feature}, "
+                   f"threshold={self.threshold}]\n")
 
-        # Sol və sağ uşaqları string formatına salıb prefiks funksiyalarından keçiririk
-        left_str = left_child_add_prefix(str(self.left_child)) if self.left_child else ""
-        right_str = right_child_add_prefix(str(self.right_child)) if self.right_child else ""
+        if self.left_child:
+            res += self.left_child_add_prefix(str(self.left_child))
+        if self.right_child:
+            res += self.right_child_add_prefix(str(self.right_child))
 
-        full_str = node_str + left_str + right_str
-        
-        # Ən sondakı artıq boş sətiri silirik
-        return full_str.rstrip('\n')
+        # Sağdakı əlavə boşluq və yeni sətirləri təmizləyirik
+        return res.rstrip()
 
-#frf
+
 class Decision_Tree:
-    """ Decision Tree class """
+    """Decision Tree model class."""
+
     def __init__(self, root=None):
+        """Initializes the decision tree with a root node."""
         self.root = root
 
     def __str__(self):
+        """Returns the string representation of the entire tree."""
         if self.root is None:
             return ""
-        return str(self.root)
+        return self.root.__str__()
