@@ -181,7 +181,8 @@ class Decision_Tree:
         if self.split_criterion == "random":
             self.split_criterion = self.random_split_criterion
         else:
-            pass # Gini_split_criterion gələcəkdə bura əlavə edilə bilər
+            # Gini_split_criterion gələcəkdə bura əlavə edilə bilər
+            pass
 
         self.explanatory = explanatory
         self.target = target
@@ -191,11 +192,13 @@ class Decision_Tree:
         self.update_predict()
 
         if verbose == 1:
+            leaf_cnt = self.count_nodes(only_leaves=True)
+            acc = self.accuracy(self.explanatory, self.target)
             print(f"  Training finished.\n"
                   f"    - Depth                     : {self.depth()}\n"
                   f"    - Number of nodes           : {self.count_nodes()}\n"
-                  f"    - Number of leaves          : {self.count_nodes(only_leaves=True)}\n"
-                  f"    - Accuracy on training data : {self.accuracy(self.explanatory, self.target)}")
+                  f"    - Number of leaves          : {leaf_cnt}\n"
+                  f"    - Accuracy on training data : {acc}")
 
     def fit_node(self, node):
         node.feature, node.threshold = self.split_criterion(node)
@@ -233,14 +236,14 @@ class Decision_Tree:
             self.fit_node(node.right_child)
 
     def get_leaf_child(self, node, sub_population):
-        # Əgər alt populyasiya boşdursa, parent node-un dəyərindən istifadə et
+        # Əgər alt populyasiya boşdursa, parent node dəyərindən istifadə et
         if np.sum(sub_population) == 0:
             targets = self.target[node.sub_population]
         else:
             targets = self.target[sub_population]
 
         value = np.bincount(targets).argmax()
-        
+
         leaf_child = Leaf(value)
         leaf_child.depth = node.depth + 1
         leaf_child.sub_population = sub_population
