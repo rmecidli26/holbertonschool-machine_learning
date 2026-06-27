@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Decision Tree builder module.
-Provides classes to build and manage a Decision Tree.
+Provides classes to build, manage bounds, and compute indicators.
 """
 import numpy as np
 
@@ -33,18 +33,20 @@ class Leaf:
     def update_indicator(self):
         """Computes and stores the indicator function."""
         def is_large_enough(x):
-            if not self.lower:
+            keys = list(self.lower.keys())
+            if not keys:
                 return np.ones(x.shape[0], dtype=bool)
             conds = np.array([
-                np.greater(x[:, k], self.lower[k]) for k in self.lower
+                np.greater(x[:, k], self.lower[k]) for k in keys
             ])
             return np.all(conds, axis=0)
 
         def is_small_enough(x):
-            if not self.upper:
+            keys = list(self.upper.keys())
+            if not keys:
                 return np.ones(x.shape[0], dtype=bool)
             conds = np.array([
-                np.less_equal(x[:, k], self.upper[k]) for k in self.upper
+                np.less_equal(x[:, k], self.upper[k]) for k in keys
             ])
             return np.all(conds, axis=0)
 
@@ -125,14 +127,17 @@ class Node:
             if child is not None:
                 child.lower = self.lower.copy()
                 child.upper = self.upper.copy()
+                
+                # Sol övlad (Left child): x > threshold olduğu üçün LOWER yenilənir
                 if is_left:
-                    child.upper[self.feature] = min(
-                        child.upper.get(self.feature, np.inf),
-                        self.threshold
-                    )
-                else:
                     child.lower[self.feature] = max(
                         child.lower.get(self.feature, -np.inf),
+                        self.threshold
+                    )
+                # Sağ övlad (Right child): x <= threshold olduğu üçün UPPER yenilənir
+                else:
+                    child.upper[self.feature] = min(
+                        child.upper.get(self.feature, np.inf),
                         self.threshold
                     )
                 child.update_bounds_below()
@@ -140,46 +145,15 @@ class Node:
     def update_indicator(self):
         """Computes and stores the indicator function."""
         def is_large_enough(x):
-            if not self.lower:
+            keys = list(self.lower.keys())
+            if not keys:
                 return np.ones(x.shape[0], dtype=bool)
             conds = np.array([
-                np.greater(x[:, k], self.lower[k]) for k in self.lower
+                np.greater(x[:, k], self.lower[k]) for k in keys
             ])
             return np.all(conds, axis=0)
 
         def is_small_enough(x):
-            if not self.upper:
-                return np.ones(x.shape[0], dtype=bool)
-            conds = np.array([
-                np.less_equal(x[:, k], self.upper[k]) for k in self.upper
-            ])
-            return np.all(conds, axis=0)
-
-        self.indicator = lambda x: np.all(
-            np.array([is_large_enough(x), is_small_enough(x)]), axis=0
-        )
-
-
-class Decision_Tree:
-    """Decision Tree model class."""
-
-    def __init__(self, root=None):
-        """Initializes the tree with a root."""
-        self.root = root
-
-    def __str__(self):
-        """Returns string representation of the tree."""
-        if self.root is None:
-            return ""
-        return str(self.root)
-
-    def get_leaves(self):
-        """Returns all leaves in the tree."""
-        if self.root:
-            return self.root.get_leaves()
-        return []
-
-    def update_bounds(self):
-        """Updates bounds for all nodes in the tree."""
-        if self.root:
-            self.root.update_bounds_below()
+            keys = list(self.upper.keys())
+            if not keys:
+                return
