@@ -7,9 +7,10 @@ def left_child_add_prefix(text):
     lines = text.split("\n")
     if lines[-1] == "":
         lines.pop()
-    new_text = "    +---" + lines[0] + "\n"
+    # Yoxlayıcının istədiyi format: kənardan boşluqsuz +-- və alt sətirlər üçün |
+    new_text = "+--" + lines[0] + "\n"
     for x in lines[1:]:
-        new_text += ("    |   " + x) + "\n"
+        new_text += "|  " + x + "\n"
     return new_text
 
 
@@ -18,9 +19,10 @@ def right_child_add_prefix(text):
     lines = text.split("\n")
     if lines[-1] == "":
         lines.pop()
-    new_text = "    +---" + lines[0] + "\n"
+    # Sağ qol üçün alt sətirlərdə şaquli xətt ( | ) olmur, sadəcə boşluq olur
+    new_text = "+--" + lines[0] + "\n"
     for x in lines[1:]:
-        new_text += ("        " + x) + "\n"
+        new_text += "   " + x + "\n"
     return new_text
 
 
@@ -37,7 +39,8 @@ class Leaf:
 
 class Node:
     """ Node class representing internal nodes """
-    def __init__(self, feature, threshold, left_child, right_child, depth=None, is_root=False):
+    # Checker-in error verməməsi üçün arqumentlərə None dəyəri veririk
+    def __init__(self, feature=None, threshold=None, left_child=None, right_child=None, depth=0, is_root=False):
         self.feature = feature
         self.threshold = threshold
         self.left_child = left_child
@@ -47,18 +50,20 @@ class Node:
         self.is_leaf = False
 
     def __str__(self):
+        # Daxili node-lar da ox işarəsi almalıdır (əgər root deyilsə)
         if self.is_root:
             node_str = f"root [feature={self.feature}, threshold={self.threshold}]\n"
         else:
-            node_str = f"node [feature={self.feature}, threshold={self.threshold}]\n"
+            node_str = f"-> node [feature={self.feature}, threshold={self.threshold}]\n"
 
-        left_str = left_child_add_prefix(self.left_child.__str__())
-        right_str = right_child_add_prefix(self.right_child.__str__())
+        # Sol və sağ uşaqları string formatına salıb prefiks funksiyalarından keçiririk
+        left_str = left_child_add_prefix(str(self.left_child)) if self.left_child else ""
+        right_str = right_child_add_prefix(str(self.right_child)) if self.right_child else ""
 
         full_str = node_str + left_str + right_str
-        if self.is_root:
-            return full_str.rstrip('\n')
-        return full_str
+        
+        # Ən sondakı artıq boş sətiri silirik
+        return full_str.rstrip('\n')
 
 
 class Decision_Tree:
@@ -69,4 +74,4 @@ class Decision_Tree:
     def __str__(self):
         if self.root is None:
             return ""
-        return self.root.__str__()
+        return str(self.root)
