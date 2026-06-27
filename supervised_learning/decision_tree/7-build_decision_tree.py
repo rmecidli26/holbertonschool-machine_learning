@@ -32,25 +32,32 @@ class Leaf:
     """Leaf class representing terminal nodes in the decision tree."""
 
     def __init__(self, value, depth=None):
+        """Initializes a Leaf node."""
         self.value = value
         self.depth = depth
         self.is_leaf = True
         self.sub_population = None
 
     def __str__(self):
+        """Returns string representation of the leaf."""
         return f"-> leaf [value={self.value}]"
 
     def pred(self, x):
+        """Predicts the value for a given individual x."""
         return self.value
 
     def update_bounds_below(self):
+        """Updates the bounds for the leaf (does nothing for leaves)."""
         pass
 
     def get_leaves(self):
+        """Returns a list containing only this leaf."""
         return [self]
 
     def update_indicator(self):
+        """Updates the indicator function for this leaf."""
         def indicator(A):
+            """Indicator function that checks if elements belong to leaf."""
             mask = np.ones(A.shape[0], dtype=bool)
             for feature, value in getattr(self, 'lower', {}).items():
                 mask &= (A[:, feature] > value)
@@ -67,6 +74,7 @@ class Node:
         self, feature=None, threshold=None, left_child=None,
         right_child=None, depth=0, is_root=False
     ):
+        """Initializes an internal Node."""
         self.feature = feature
         self.threshold = threshold
         self.left_child = left_child
@@ -77,6 +85,7 @@ class Node:
         self.sub_population = None
 
     def __str__(self):
+        """Returns string representation of the node and its children."""
         if self.is_root:
             node_str = (
                 f"root [feature={self.feature}, "
@@ -99,12 +108,14 @@ class Node:
         return (node_str + left_str + right_str).rstrip('\n')
 
     def pred(self, x):
+        """Recursively predicts the value for a given individual x."""
         if x[self.feature] > self.threshold:
             return self.left_child.pred(x)
         else:
             return self.right_child.pred(x)
 
     def update_bounds_below(self):
+        """Updates the boundary limits for the subtree below this node."""
         if self.is_root:
             if not hasattr(self, 'lower'):
                 self.lower = {}
@@ -125,6 +136,7 @@ class Node:
             self.right_child.update_bounds_below()
 
     def get_leaves(self):
+        """Returns a list of all leaves under this node."""
         leaves = []
         if self.left_child:
             leaves += self.left_child.get_leaves()
@@ -139,6 +151,7 @@ class Decision_Tree:
     def __init__(
         self, split_criterion="random", max_depth=100, min_pop=2, seed=0
     ):
+        """Initializes the Decision Tree."""
         self.root = Node(is_root=True)
         self.split_criterion = split_criterion
         self.max_depth = max_depth
@@ -149,19 +162,23 @@ class Decision_Tree:
         self.predict = None
 
     def __str__(self):
+        """Returns string representation of the tree starting from root."""
         if self.root is None:
             return ""
         return str(self.root)
 
     def pred(self, x):
+        """Predicts the value for a single sample x."""
         if self.root:
             return self.root.pred(x)
         return None
 
     def np_extrema(self, arr):
+        """Returns the minimum and maximum of an array."""
         return np.min(arr), np.max(arr)
 
     def random_split_criterion(self, node):
+        """Randomly chooses a feature and a threshold to split the node."""
         diff = 0
         feature_min, feature_max = 0, 0
         feature = 0
@@ -178,10 +195,11 @@ class Decision_Tree:
         return feature, threshold
 
     def fit(self, explanatory, target, verbose=0):
+        """Trains the decision tree on given explanatory and target data."""
         if self.split_criterion == "random":
             self.split_criterion = self.random_split_criterion
         else:
-            # Gini_split_criterion gələcəkdə bura əlavə edilə bilər
+            # Gini_split_criterion will be added later
             pass
 
         self.explanatory = explanatory
@@ -201,14 +219,15 @@ class Decision_Tree:
                   f"    - Accuracy on training data : {acc}")
 
     def fit_node(self, node):
+        """Recursively fits the node and its sub_population."""
         node.feature, node.threshold = self.split_criterion(node)
 
-        # Qaydaya əsasən "strictly greater" (> işarəsi)
         left_mask = self.explanatory[:, node.feature] > node.threshold
         left_population = node.sub_population & left_mask
         right_population = node.sub_population & ~left_mask
 
         def check_if_leaf(pop):
+            """Helper to determine if the node should be a leaf."""
             if np.sum(pop) < self.min_pop:
                 return True
             if (node.depth + 1) >= self.max_depth:
@@ -217,7 +236,6 @@ class Decision_Tree:
                 return True
             return False
 
-        # Is left node a leaf ?
         is_left_leaf = check_if_leaf(left_population)
 
         if is_left_leaf:
@@ -226,7 +244,6 @@ class Decision_Tree:
             node.left_child = self.get_node_child(node, left_population)
             self.fit_node(node.left_child)
 
-        # Is right node a leaf ?
         is_right_leaf = check_if_leaf(right_population)
 
         if is_right_leaf:
@@ -236,7 +253,7 @@ class Decision_Tree:
             self.fit_node(node.right_child)
 
     def get_leaf_child(self, node, sub_population):
-        # Əgər alt populyasiya boşdursa, parent node dəyərindən istifadə et
+        """Creates and returns a new leaf child."""
         if np.sum(sub_population) == 0:
             targets = self.target[node.sub_population]
         else:
@@ -250,17 +267,20 @@ class Decision_Tree:
         return leaf_child
 
     def get_node_child(self, node, sub_population):
+        """Creates and returns a new internal node child."""
         n = Node()
         n.depth = node.depth + 1
         n.sub_population = sub_population
         return n
 
     def accuracy(self, test_explanatory, test_target):
+        """Calculates and returns the accuracy of the model on test data."""
         return np.sum(
             np.equal(self.predict(test_explanatory), test_target)
         ) / test_target.size
 
     def update_predict(self):
+        """Updates the tree's internal prediction function lambda."""
         self.update_bounds()
         leaves = self.get_leaves()
         for leaf in leaves:
@@ -272,15 +292,18 @@ class Decision_Tree:
         )
 
     def update_bounds(self):
+        """Initiates updating spatial bounds from the root."""
         if self.root:
             self.root.update_bounds_below()
 
     def get_leaves(self):
+        """Returns all leaves in the decision tree."""
         if self.root:
             return self.root.get_leaves()
         return []
 
     def depth(self, node=None):
+        """Calculates and returns the maximum depth of the tree."""
         if node is None:
             node = self.root
         if getattr(node, 'is_leaf', False) or node is None:
@@ -291,6 +314,7 @@ class Decision_Tree:
         return max(l_d, r_d)
 
     def count_nodes(self, node=None, only_leaves=False):
+        """Counts and returns the total number of nodes (or only leaves)."""
         if node is None:
             node = self.root
         if node is None:
