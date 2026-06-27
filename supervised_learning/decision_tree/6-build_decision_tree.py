@@ -30,7 +30,7 @@ def right_child_add_prefix(text):
 
 class Leaf:
     """Leaf class representing terminal nodes in the decision tree."""
-    
+
     def __init__(self, value, depth=None):
         """Initializes a leaf node with a specific value and depth."""
         self.value = value
@@ -68,7 +68,7 @@ class Leaf:
 
 class Node:
     """Node class representing internal decision nodes in the tree."""
-    
+
     def __init__(
         self, feature=None, threshold=None, left_child=None, 
         right_child=None, depth=0, is_root=False
@@ -98,7 +98,7 @@ class Node:
         left_str = ""
         if self.left_child:
             left_str = left_child_add_prefix(str(self.left_child))
-            
+
         right_str = ""
         if self.right_child:
             right_str = right_child_add_prefix(str(self.right_child))
@@ -130,7 +130,7 @@ class Node:
         if self.left_child:
             self.left_child.lower[self.feature] = self.threshold
             self.left_child.update_bounds_below()
-        
+
         if self.right_child:
             self.right_child.upper[self.feature] = self.threshold
             self.right_child.update_bounds_below()
@@ -147,7 +147,7 @@ class Node:
 
 class Decision_Tree:
     """Decision Tree class managing the entire tree structure."""
-    
+
     def __init__(self, root=None):
         """Initializes the Decision Tree with an optional root node."""
         self.root = root
@@ -170,7 +170,7 @@ class Decision_Tree:
         leaves = self.get_leaves()
         for leaf in leaves:
             leaf.update_indicator()
-            
+
         self.predict = lambda A: np.sum(
             [leaf.indicator(A) * leaf.value for leaf in leaves], 
             axis=0
