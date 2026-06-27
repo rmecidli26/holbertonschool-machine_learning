@@ -65,7 +65,7 @@ class Node:
         # Ən sondakı artıq boş sətiri silirik
         return full_str.rstrip('\n')
 
-
+#frf
 class Decision_Tree:
     """ Decision Tree class """
     def __init__(self, root=None):
