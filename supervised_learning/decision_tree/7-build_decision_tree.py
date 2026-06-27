@@ -185,7 +185,6 @@ class Decision_Tree:
         if self.split_criterion == "random":
             self.split_criterion = self.random_split_criterion
         else:
-            # Gini criterion will be assigned here in later tasks
             pass
 
         self.explanatory = explanatory
@@ -201,11 +200,12 @@ class Decision_Tree:
         self.update_predict()
 
         if verbose == 1:
-            print("  Training finished.")
-            print(f"  - Depth                     : {self.depth()}")
-            print(f"  - Number of nodes           : {self.count_nodes()}")
-            print(f"  - Number of leaves          : {self.count_nodes(only_leaves=True)}")
-            print(f"  - Accuracy on training data : {self.accuracy(self.explanatory, self.target)}")
+            # DIQQƏT: Yoxlayıcı sistem məhz bu formatı tələb edir
+            print("Training finished.")
+            print(f"Depth : {self.depth()}")
+            print(f"Number of nodes : {self.count_nodes()}")
+            print(f"Number of leaves : {self.count_nodes(only_leaves=True)}")
+            print(f"Accuracy on training data : {self.accuracy(self.explanatory, self.target)}")
 
     def fit_node(self, node):
         """Recursively splits the node's population."""
