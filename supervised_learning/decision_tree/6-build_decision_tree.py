@@ -39,14 +39,22 @@ class Leaf:
         """ Predicts the value for a single observation """
         return self.value
 
-    # ========================================================
-    # DİQQƏT: 3, 4 və 5-ci tapşırıqlardan olan metodlarınızı
-    # (məsələn: indicator, update_indicator) BURAYA ƏLAVƏ EDİN!
-    # ========================================================
-    # def indicator(self, A):
-    #     ...
-    # def update_indicator(self):
-    #     ...
+    # --- Əvvəlki tapşırıqlardan gələn metodlar ---
+    def update_bounds_below(self):
+        pass
+
+    def get_leaves(self):
+        return [self]
+
+    def update_indicator(self):
+        def indicator(A):
+            mask = np.ones(A.shape[0], dtype=bool)
+            for feature, value in self.lower.items():
+                mask &= (A[:, feature] > value)
+            for feature, value in self.upper.items():
+                mask &= (A[:, feature] <= value)
+            return mask
+        self.indicator = indicator
 
 
 class Node:
@@ -79,6 +87,35 @@ class Node:
         else:
             return self.right_child.pred(x)
 
+    # --- Əvvəlki tapşırıqlardan gələn metodlar ---
+    def update_bounds_below(self):
+        if self.is_root:
+            if not hasattr(self, 'lower'):
+                self.lower = {}
+            if not hasattr(self, 'upper'):
+                self.upper = {}
+
+        for child in [self.left_child, self.right_child]:
+            if child:
+                child.lower = self.lower.copy()
+                child.upper = self.upper.copy()
+
+        if self.left_child:
+            self.left_child.lower[self.feature] = self.threshold
+            self.left_child.update_bounds_below()
+        
+        if self.right_child:
+            self.right_child.upper[self.feature] = self.threshold
+            self.right_child.update_bounds_below()
+
+    def get_leaves(self):
+        leaves = []
+        if self.left_child:
+            leaves += self.left_child.get_leaves()
+        if self.right_child:
+            leaves += self.right_child.get_leaves()
+        return leaves
+
 
 class Decision_Tree:
     """ Decision Tree class """
@@ -92,7 +129,9 @@ class Decision_Tree:
 
     def pred(self, x):
         """ Predicts the value for a single observation using the root """
-        return self.root.pred(x)
+        if self.root:
+            return self.root.pred(x)
+        return None
 
     def update_predict(self):
         """ Updates the prediction function for the entire tree """
@@ -106,11 +145,12 @@ class Decision_Tree:
             axis=0
         )
 
-    # ========================================================
-    # DİQQƏT: 3, 4 və 5-ci tapşırıqlardan olan metodlarınızı
-    # (məsələn: update_bounds, get_leaves) BURAYA ƏLAVƏ EDİN!
-    # ========================================================
-    # def update_bounds(self):
-    #     ...
-    # def get_leaves(self):
-    #     ...
+    # --- Əvvəlki tapşırıqlardan gələn metodlar ---
+    def update_bounds(self):
+        if self.root:
+            self.root.update_bounds_below()
+
+    def get_leaves(self):
+        if self.root:
+            return self.root.get_leaves()
+        return []
