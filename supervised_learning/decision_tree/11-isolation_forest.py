@@ -64,7 +64,7 @@ class Isolation_Random_Forest():
 
         # Ən kiçik dərinliklərin indekslərini tapırıq
         suspect_indices = np.argsort(depths)[:n_suspects]
-        
+
         # Həmin indekslərə uyğun gələn sətirləri və dərinlikləri qaytarırıq
         suspect_rows = explanatory[suspect_indices]
         suspect_depths = depths[suspect_indices]
