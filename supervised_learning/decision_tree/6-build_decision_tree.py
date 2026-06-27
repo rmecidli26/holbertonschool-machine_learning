@@ -59,7 +59,8 @@ class Leaf:
 
 class Node:
     """ Node class representing internal nodes """
-    def __init__(self, feature=None, threshold=None, left_child=None, right_child=None, depth=0, is_root=False):
+    {def __init__(self, feature=None, threshold=None, left_child=None, 
+    right_child=None, depth=0, is_root=False):}
         self.feature = feature
         self.threshold = threshold
         self.left_child = left_child
@@ -74,14 +75,16 @@ class Node:
         else:
             node_str = f"-> node [feature={self.feature}, threshold={self.threshold}]\n"
 
-        left_str = left_child_add_prefix(str(self.left_child)) if self.left_child else ""
-        right_str = right_child_add_prefix(str(self.right_child)) if self.right_child else ""
+        left_str = left_child_add_prefix(str(self.left_child)) 
+        if self.left_child else ""
+        right_str = right_child_add_prefix(str(self.right_child)) 
+        if self.right_child else ""
 
         full_str = node_str + left_str + right_str
         return full_str.rstrip('\n')
 
     def pred(self, x):
-        """ Recursively finds the leaf value for a single observation """
+        """ Recursively finds the leaation """
         if x[self.feature] > self.threshold:
             return self.left_child.pred(x)
         else:
@@ -128,13 +131,13 @@ class Decision_Tree:
         return str(self.root)
 
     def pred(self, x):
-        """ Predicts the value for a single observation using the root """
+        """ Predicts the valoot """
         if self.root:
             return self.root.pred(x)
         return None
 
     def update_predict(self):
-        """ Updates the prediction function for the entire tree """
+        """ Updates the  tree """
         self.update_bounds()
         leaves = self.get_leaves()
         for leaf in leaves:
