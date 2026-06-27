@@ -201,13 +201,11 @@ class Decision_Tree:
         self.update_predict()
 
         if verbose == 1:
-            acc = self.accuracy(self.explanatory, self.target)
-            print("  Training finished.")
-            print(f"- Depth                     : {self.depth()}")
-            print(f"- Number of nodes           : {self.count_nodes()}")
-            leaves_cnt = self.count_nodes(only_leaves=True)
-            print(f"- Number of leaves          : {leaves_cnt}")
-            print(f"- Accuracy on training data : {acc}")
+            print(f"""  Training finished.
+- Depth                     : { self.depth() }
+- Number of nodes           : { self.count_nodes() }
+- Number of leaves          : { self.count_nodes(only_leaves=True) }
+- Accuracy on training data : { self.accuracy(self.explanatory, self.target) }""")
 
     def fit_node(self, node):
         """Recursively splits the node's population."""
