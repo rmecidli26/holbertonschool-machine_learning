@@ -70,7 +70,7 @@ class Node:
     """Node class representing internal decision nodes in the tree."""
 
     def __init__(
-        self, feature=None, threshold=None, left_child=None, 
+        self, feature=None, threshold=None, left_child=None,
         right_child=None, depth=0, is_root=False
     ):
         """Initializes an internal node with splitting conditions."""
@@ -172,7 +172,7 @@ class Decision_Tree:
             leaf.update_indicator()
 
         self.predict = lambda A: np.sum(
-            [leaf.indicator(A) * leaf.value for leaf in leaves], 
+            [leaf.indicator(A) * leaf.value for leaf in leaves],
             axis=0
         )
 
