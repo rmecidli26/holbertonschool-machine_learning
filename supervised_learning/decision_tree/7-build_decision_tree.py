@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Decision Tree module.
-Provides classes for Lementation.
+Provides classes for Tree Implementation.
 """
 import numpy as np
 
@@ -201,11 +201,11 @@ class Decision_Tree:
         self.update_predict()
 
         if verbose == 1:
-            print(f"""  Training finished.
-- Depth                     : { self.depth() }
-- Number of nodes           : { self.count_nodes() }
-- Number of leaves          : { self.count_nodes(only_leaves=True) }
-- Accuracy on training data : { self.accuracy(self.explanatory, self.target) }""")
+            print("  Training finished.")
+            print(f"  - Depth                     : {self.depth()}")
+            print(f"  - Number of nodes           : {self.count_nodes()}")
+            print(f"  - Number of leaves          : {self.count_nodes(only_leaves=True)}")
+            print(f"  - Accuracy on training data : {self.accuracy(self.explanatory, self.target)}")
 
     def fit_node(self, node):
         """Recursively splits the node's population."""
@@ -290,7 +290,6 @@ class Decision_Tree:
             return self.root.get_leaves()
         return []
 
-    # --- Köməkçi Metodlar (Çıxışda xəta almamamaq üçün əlavə edildi) ---
     def depth(self, node=None):
         """Calculates the maximum depth of the tree."""
         if node is None:
