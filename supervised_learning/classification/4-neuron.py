@@ -83,12 +83,12 @@ class Neuron:
         """
         # Step 1: Compute activated outputs via forward propagation
         A = self.forward_prop(X)
-        
+
         # Step 2: Calculate the network cost
         net_cost = self.cost(Y, A)
-        
+
         # Step 3: Threshold activations to find binary
         # .astype(int) converts the boolean matrix entries to binary ints
         prediction = np.where(A >= 0.5, 1, 0)
-        
+
         return prediction, net_cost
