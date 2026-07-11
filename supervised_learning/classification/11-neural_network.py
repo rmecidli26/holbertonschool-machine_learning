@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Defines a neural network with one hidden layer performing cost calculation"""
+"""Defines a neural network with one hidden layer"""
 import numpy as np
 
 
