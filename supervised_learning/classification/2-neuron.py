@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Defines a single neuron performing binary classification with forward propagation
+Defines a single neuron performing binary 
 """
 import numpy as np
 
@@ -53,7 +53,7 @@ class Neuron:
         The updated private attribute __A.
         """
         # Linear equation: Z = W * X + b
-        # W has shape (1, nx) and X has shape (nx, m) -> Z will have shape (1, m)
+        # W has shape (1, nx) and X has shape 
         Z = np.dot(self.__W, X) + self.__b
 
         # Sigmoid activation function: A = 1 / (1 + e^(-Z))
