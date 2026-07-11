@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Defines a single neuron performing binary classification with private attributes
+Defines a single neuron performing binary 
 """
 import numpy as np
 
 
 class Neuron:
     """
-    Represents a single neuron performing binary classification.
+    Represents a single neuron passification.
     """
     def __init__(self, nx):
         """
