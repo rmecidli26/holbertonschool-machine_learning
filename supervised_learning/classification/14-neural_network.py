@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Defines a neural network with one hidden layer performing binary train loop"""
+"""Defines a neural network with one hidden layermk """
 import numpy as np
 
 
