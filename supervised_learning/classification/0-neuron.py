@@ -7,7 +7,7 @@ import numpy as np
 
 class Neuron:
     """
-    Represents a single neuron performing 
+    Represents a single neuron performing
     """
     def __init__(self, nx):
         """
@@ -24,9 +24,9 @@ class Neuron:
         # Weights vector initial
         # Shape is (1, nx) to match thected shape (1, 784)
         self.W = np.random.normal(size=(1, nx))
-        
+
         # Bias initialized to 0
         self.b = 0
-        
+
         # Activated outpu ed to 0
         self.A = 0
