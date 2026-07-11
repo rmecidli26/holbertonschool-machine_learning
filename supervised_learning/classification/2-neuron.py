@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Defines a single neuron performing binary 
+Defines a single neuron performing binary
 """
 import numpy as np
 
