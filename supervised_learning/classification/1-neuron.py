@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Defines a single neuron performing binary 
+Defines a single neuron performing binary
 """
 import numpy as np
 
@@ -12,7 +12,6 @@ class Neuron:
     def __init__(self, nx):
         """
         Initializes the neuron.
-
         Parameters:
         nx (int): The number of input features to the neuron.
         """
