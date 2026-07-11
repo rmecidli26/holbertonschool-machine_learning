@@ -53,7 +53,7 @@ class Neuron:
         The updated private attribute __A.
         """
         # Linear equation: Z = W * X + b
-        # W has shape (1, nx) and X has shape 
+        # W has shape (1, nx) and X has shape
         Z = np.dot(self.__W, X) + self.__b
 
         # Sigmoid activation function: A = 1 / (1 + e^(-Z))
