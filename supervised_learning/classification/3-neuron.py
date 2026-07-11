@@ -67,7 +67,7 @@ class Neuron:
         """
         m = Y.shape[1]
 
-        # Calculate cross-entropy cost 
+        # Calculate cross-entropy cost
         # Formula: J = -1/m * sum(Y * log(A) + (1 - Y) * log(1.0000001 - A))
         cost = -1 / m * np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
 
