@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 def build_model(nx, layers, activations, lambtha, keep_prob):
-    """ Tree """
+    """ Builds a neural network with the Keras library """
     model = tf.keras.Sequential()
     regularizer = tf.keras.regularizers.l2(lambtha)
 
@@ -24,7 +24,7 @@ def build_model(nx, layers, activations, lambtha, keep_prob):
                 kernel_regularizer=regularizer
             ))
 
-        # Last layer
+        # Last layer check for dropout
         if i < len(layers) - 1:
             model.add(tf.keras.layers.Dropout(rate=1 - keep_prob))
 
