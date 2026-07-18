@@ -15,7 +15,7 @@ def train_model(
     verbose=True,
     shuffle=False
 ):
-    """ Trains a model using mini-batch gradient descent with early stopping """
+    """ Trains a model using mini-batch"""
     callbacks = []
 
     # Erkən dayandırma şərtini yoxlayırıq
