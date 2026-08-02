@@ -4,7 +4,7 @@
 
 def update_variables_momentum(alpha, beta1, var, grad, v):
     """
-    Updates a variable using 
+    Updates a variable using
 
     Parameters:
         alpha: learning rate
