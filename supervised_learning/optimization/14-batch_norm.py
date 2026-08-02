@@ -14,7 +14,7 @@ def shuffle_data(X, Y):
     Returns:
         X_shuffled, Y_shuffled as tensors
     """
-    m = tf.shape(X)[0]
+    m = X.shape[0]
     permutation = tf.random.shuffle(tf.range(m))
     return tf.gather(X, permutation), tf.gather(Y, permutation)
 
@@ -35,7 +35,7 @@ def mini_batches(X, Y, batch_size=64, seed=0):
     tf.random.set_seed(seed)
     X_shuffled, Y_shuffled = shuffle_data(X, Y)
 
-    m = tf.shape(X)[0]
+    m = X.shape[0]
     mini_batches_list = []
 
     num_complete_batches = m // batch_size
