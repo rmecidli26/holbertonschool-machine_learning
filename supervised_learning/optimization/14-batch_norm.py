@@ -1,35 +1,52 @@
 #!/usr/bin/env python3
-"""Module to create a batch normalization layer in TensorFlow"""
+"""Module to create mini-batches from X and Y"""
 import tensorflow as tf
 
 
-def create_batch_norm_layer(prev, n, activation):
+def shuffle_data(X, Y):
     """
-    Creates a batch normalization layer for a neural network in TensorFlow
+    Shuffles the data points in two matrices synchronously
 
     Parameters:
-        prev: activated output of the previous layer
-        n: number of nodes in the layer to be created
-        activation: activation function to be used on the output
+        X: tf.Tensor or numpy.ndarray of shape (m, nx)
+        Y: tf.Tensor or numpy.ndarray of shape (m, ny)
 
     Returns:
-        A tensor of the activated output for the layer
+        X_shuffled, Y_shuffled as numpy arrays
     """
-    init = tf.keras.initializers.VarianceScaling(mode='fan_avg')
-    
-    layer = tf.keras.layers.Dense(
-        units=n,
-        kernel_initializer=init,
-        use_bias=False
-    )
-    base_output = layer(prev)
-    
-    norm_layer = tf.keras.layers.BatchNormalization(
-        epsilon=1e-7
-    )
-    norm_output = norm_layer(base_output)
-    
-    if activation is None:
-        return norm_output
-        
-    return activation(norm_output)
+    m = X.shape[0]
+    permutation = tf.random.shuffle(tf.range(m))
+    return tf.gather(X, permutation), tf.gather(Y, permutation)
+
+
+def mini_batches(X, Y, batch_size=64, seed=0):
+    """
+    Creates mini-batches from X and Y for mini-batch gradient descent
+
+    Parameters:
+        X: numpy.ndarray of shape (m, nx) representing input data
+        Y: numpy.ndarray of shape (m, ny) representing labels
+        batch_size: number of data points in a batch
+        seed: seed for random number generator
+
+    Returns:
+        list of mini-batches containing (X_batch, Y_batch)
+    """
+    tf.random.set_seed(seed)
+    X_shuffled, Y_shuffled = shuffle_data(X, Y)
+
+    m = X.shape[0]
+    mini_batches_list = []
+
+    num_complete_batches = m // batch_size
+    for k in range(num_complete_batches):
+        X_batch = X_shuffled[k * batch_size:(k + 1) * batch_size]
+        Y_batch = Y_shuffled[k * batch_size:(k + 1) * batch_size]
+        mini_batches_list.append((X_batch, Y_batch))
+
+    if m % batch_size != 0:
+        X_batch = X_shuffled[num_complete_batches * batch_size:]
+        Y_batch = Y_shuffled[num_complete_batches * batch_size:]
+        mini_batches_list.append((X_batch, Y_batch))
+
+    return mini_batches_list
