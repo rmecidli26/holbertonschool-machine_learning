@@ -7,12 +7,12 @@ import tensorflow as tf
 
 def flip_image(image):
     """
-    3D tens
+    3D tensor şəklində verilmiş şəkli üfüqi olaraq çevirir.
 
     Parameters:
-        im
+        image: çevriləcək şəkli özündə saxlayan 3D tf.Tensor
 
     Returns:
-        
+        Üfüqi çevrilmiş tf.Tensor
     """
     return tf.image.flip_left_right(image)
