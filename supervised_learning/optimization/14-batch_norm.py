@@ -22,7 +22,9 @@ def create_batch_norm_layer(prev, n, activation):
         use_bias=False
     )(prev)
 
-    batch_norm = tf.keras.layers.BatchNormalization(axis=-1)(dense)
+    batch_norm = tf.keras.layers.BatchNormalization(
+        epsilon=1e-7
+    )(dense)
 
     if activation is None:
         return batch_norm
