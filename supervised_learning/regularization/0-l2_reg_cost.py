@@ -5,7 +5,7 @@ import numpy as np
 
 
 def l2_reg_cost(cost, lambtha, weights, L, m):
-    """Calculates 
+    """Calculates
 
     Args:
         L: Number of layers in the neural network.
