@@ -5,11 +5,14 @@ import tensorflow as tf
 
 
 def l2_reg_create_layer(prev, n, activation, lambtha):
-    """Creates a neural network layer with L2"""
+    """Creates a neural network layer with L2 regularization"""
     kernel_reg = tf.keras.regularizers.L2(lambtha)
+    init = tf.keras.initializers.he_normal()
+
     layer = tf.keras.layers.Dense(
         units=n,
         activation=activation,
+        kernel_initializer=init,
         kernel_regularizer=kernel_reg
     )
     return layer(prev)
