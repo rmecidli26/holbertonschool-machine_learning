@@ -264,16 +264,8 @@ class Yolo:
                 images: list of images as numpy.ndarrays
                 image_paths: list of paths to the individual images
         """
-        images = []
-        image_paths = []
-        file_paths = glob.glob(folder_path + '/*', recursive=False)
-
-        for path in file_paths:
-            image = cv2.imread(path)
-            if image is not None:
-                images.append(image)
-                image_paths.append(path)
-
+        image_paths = glob.glob(folder_path + '/*', recursive=False)
+        images = [cv2.imread(path) for path in image_paths]
         return images, image_paths
 
     def preprocess_images(self, images):
