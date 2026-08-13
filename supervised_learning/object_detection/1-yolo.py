@@ -58,8 +58,8 @@ class Yolo:
         box_class_probs = []
 
         image_height, image_width = image_size
-        input_height = self.model.input.shape[1]
-        input_width = self.model.input.shape[2]
+        input_width = self.model.input.shape[1]
+        input_height = self.model.input.shape[2]
 
         def _sigmoid(x):
             """Sigmoid activation function"""
@@ -115,3 +115,4 @@ class Yolo:
             boxes.append(box)
 
         return boxes, box_confidences, box_class_probs
+        
