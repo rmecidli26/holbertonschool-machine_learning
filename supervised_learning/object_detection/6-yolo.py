@@ -3,6 +3,7 @@
 
 import cv2
 import glob
+import os
 import tensorflow.keras as K
 import numpy as np
 
@@ -302,3 +303,55 @@ class Yolo:
         image_shapes = np.array(image_shapes)
 
         return pimages, image_shapes
+
+    def show_boxes(self, image, boxes, box_classes, box_scores, file_name):
+        """
+        Displays the image with all boundary boxes, class names,
+        and box scores.
+
+        parameters:
+            image: a numpy.ndarray containing an unprocessed image
+            boxes: a numpy.ndarray containing the boundary boxes for the image
+            box_classes: a numpy.ndarray containing the class indices
+                         for each box
+            box_scores: a numpy.ndarray containing the box scores for each box
+            file_name: the file path where the original image is stored
+        """
+        for i, box in enumerate(boxes):
+            # Extract box coordinates
+            x1, y1, x2, y2 = map(int, box)
+
+            # Draw the box using a blue line of thickness 2
+            cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 2)
+
+            # Prepare class name and rounded score (to 2 decimal places)
+            class_name = self.class_names[box_classes[i]]
+            score = round(box_scores[i], 2)
+            text = "{} {}".format(class_name, score)
+
+            # Draw text over the box (5 pixels above the top-left corner)
+            cv2.putText(
+                image, text, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX,
+                0.5, (0, 0, 255), 1, cv2.LINE_AA
+            )
+
+        # Show the image window
+        cv2.imshow(file_name, image)
+        
+        # Wait for key press
+        key = cv2.waitKey(0)
+        
+        # If the 's' key is pressed, save the image
+        if key == ord('s'):
+            if not os.path.exists('detections'):
+                os.makedirs('detections')
+            
+            # Using os.path.basename ensures saving directly inside detections 
+            # if an absolute or relative path was sent as the file_name parameter
+            save_path = os.path.join(
+                'detections',
+                os.path.basename(file_name) if ('/' in file_name or '\\' in file_name) else file_name
+            )
+            cv2.imwrite(save_path, image)
+            
+        cv2.destroyAllWindows()
