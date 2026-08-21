@@ -66,7 +66,7 @@ class NST:
             image (np.ndarray): Image array with shape (h, w, 3)
 
         Returns:
-            np.ndarray: Scaled image array of shape (nh, nw, 3)
+            tf.Tensor: Scaled image tensor of shape (1, h_new, w_new, 3)
         """
         if not isinstance(image, np.ndarray) or \
            image.ndim != 3 or image.shape[2] != 3:
@@ -89,8 +89,7 @@ class NST:
             method=tf.image.ResizeMethod.BICUBIC
         )
         scaled_image = resized_image / 255.0
-        scaled_image = tf.clip_by_value(scaled_image, 0.0, 1.0)
-        return scaled_image.numpy()[0]
+        return tf.clip_by_value(scaled_image, 0.0, 1.0)
 
     def load_model(self):
         """Creates the model used to calculate Neural Style Transfer costs."""
@@ -145,14 +144,11 @@ class NST:
 
     def generate_features(self):
         """Extracts features used to calculate neural style cost."""
-        style_batch = tf.expand_dims(self.style_image, axis=0)
-        content_batch = tf.expand_dims(self.content_image, axis=0)
-
         style_preprocessed = tf.keras.applications.vgg19.preprocess_input(
-            style_batch * 255.0
+            self.style_image * 255.0
         )
         content_preprocessed = tf.keras.applications.vgg19.preprocess_input(
-            content_batch * 255.0
+            self.content_image * 255.0
         )
 
         style_outputs = self.model(style_preprocessed)
@@ -260,13 +256,11 @@ class NST:
         Returns:
             tuple: (J, J_content, J_style, J_var)
         """
-        nh, nw, _ = self.content_image.shape
-        expected_shape = (1, nh, nw, 3)
-
+        target_shape = self.content_image.shape
         if not isinstance(generated_image, (tf.Tensor, tf.Variable)) or \
-           generated_image.shape != expected_shape:
+           generated_image.shape != target_shape:
             raise TypeError(
-                f"generated_image must be a tensor of shape {expected_shape}"
+                f"generated_image must be a tensor of shape {target_shape}"
             )
 
         gen_preprocessed = tf.keras.applications.vgg19.preprocess_input(
@@ -296,13 +290,11 @@ class NST:
         Returns:
             tuple: (grads, J_total, J_content, J_style, J_var)
         """
-        nh, nw, _ = self.content_image.shape
-        expected_shape = (1, nh, nw, 3)
-
+        target_shape = self.content_image.shape
         if not isinstance(generated_image, (tf.Tensor, tf.Variable)) or \
-           generated_image.shape != expected_shape:
+           generated_image.shape != target_shape:
             raise TypeError(
-                f"generated_image must be a tensor of shape {expected_shape}"
+                f"generated_image must be a tensor of shape {target_shape}"
             )
 
         with tf.GradientTape() as tape:
@@ -355,10 +347,9 @@ class NST:
         if not isinstance(beta2, float):
             raise TypeError("beta2 must be a float")
         if beta2 < 0.0 or beta2 > 1.0:
-            ValueError("beta2 must be in the range [0, 1]")
+            raise ValueError("beta2 must be in the range [0, 1]")
 
-        init_image = tf.expand_dims(self.content_image, axis=0)
-        generated_image = tf.Variable(init_image)
+        generated_image = tf.Variable(self.content_image)
 
         optimizer = tf.keras.optimizers.Adam(
             learning_rate=lr,
