@@ -229,5 +229,4 @@ class NST:
                 f"content_output must be a tensor of shape {target_shape}"
             )
 
-        diff = content_output - self.content_feature
-        return tf.reduce_mean(tf.square(diff)) / 2.0
+        return tf.reduce_mean(tf.square(content_output - self.content_feature))
