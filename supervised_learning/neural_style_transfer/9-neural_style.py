@@ -52,9 +52,9 @@ class NST:
 
         self.style_image = self.scale_image(style_image)
         self.content_image = self.scale_image(content_image)
-        self.alpha = alpha
-        self.beta = beta
-        self.var = var
+        self.alpha = float(alpha)
+        self.beta = float(beta)
+        self.var = float(var)
         self.load_model()
         self.generate_features()
 
@@ -355,7 +355,7 @@ class NST:
         if not isinstance(beta2, float):
             raise TypeError("beta2 must be a float")
         if beta2 < 0.0 or beta2 > 1.0:
-            raise ValueError("beta2 must be in the range [0, 1]")
+            ValueError("beta2 must be in the range [0, 1]")
 
         init_image = tf.expand_dims(self.content_image, axis=0)
         generated_image = tf.Variable(init_image)
