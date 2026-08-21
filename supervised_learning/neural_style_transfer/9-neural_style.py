@@ -16,7 +16,7 @@ class NST:
     ]
     content_layer = 'block5_conv2'
 
-    def __init__(self, style_image, content_image, alpha=1e4, beta=1):
+    def __init__(self, style_image, content_image, alpha=1e4, beta=1, var=10):
         """Initialize Neural Style Transfer parameters and images.
 
         Args:
@@ -24,6 +24,7 @@ class NST:
             content_image (np.ndarray): Image used as content reference
             alpha (float/int): Weight for content cost
             beta (float/int): Weight for style cost
+            var (float/int): Weight for variational cost
         """
         if not isinstance(style_image, np.ndarray) or \
            style_image.ndim != 3 or style_image.shape[2] != 3:
@@ -45,10 +46,15 @@ class NST:
            isinstance(beta, bool) or beta < 0:
             raise TypeError("beta must be a non-negative number")
 
+        if not isinstance(var, (int, float)) or \
+           isinstance(var, bool) or var < 0:
+            raise TypeError("var must be a non-negative number")
+
         self.style_image = self.scale_image(style_image)
         self.content_image = self.scale_image(content_image)
         self.alpha = alpha
         self.beta = beta
+        self.var = var
         self.load_model()
         self.generate_features()
 
@@ -60,7 +66,7 @@ class NST:
             image (np.ndarray): Image array with shape (h, w, 3)
 
         Returns:
-            tf.Tensor: Scaled image tensor of shape (1, h_new, w_new, 3)
+            np.ndarray: Scaled image array of shape (nh, nw, 3)
         """
         if not isinstance(image, np.ndarray) or \
            image.ndim != 3 or image.shape[2] != 3:
@@ -83,7 +89,8 @@ class NST:
             method=tf.image.ResizeMethod.BICUBIC
         )
         scaled_image = resized_image / 255.0
-        return tf.clip_by_value(scaled_image, 0.0, 1.0)
+        scaled_image = tf.clip_by_value(scaled_image, 0.0, 1.0)
+        return scaled_image.numpy()[0]
 
     def load_model(self):
         """Creates the model used to calculate Neural Style Transfer costs."""
@@ -138,11 +145,14 @@ class NST:
 
     def generate_features(self):
         """Extracts features used to calculate neural style cost."""
+        style_batch = tf.expand_dims(self.style_image, axis=0)
+        content_batch = tf.expand_dims(self.content_image, axis=0)
+
         style_preprocessed = tf.keras.applications.vgg19.preprocess_input(
-            self.style_image * 255.0
+            style_batch * 255.0
         )
         content_preprocessed = tf.keras.applications.vgg19.preprocess_input(
-            self.content_image * 255.0
+            content_batch * 255.0
         )
 
         style_outputs = self.model(style_preprocessed)
@@ -227,6 +237,19 @@ class NST:
 
         return tf.reduce_mean(tf.square(content_output - self.content_feature))
 
+    @staticmethod
+    def variational_cost(generated_image):
+        """Calculates the variational cost for the generated image.
+
+        Args:
+            generated_image (tf.Tensor|tf.Variable): Generated image tensor of
+                shape (1, nh, nw, 3).
+
+        Returns:
+            tf.Tensor: Variational cost scalar.
+        """
+        return tf.reduce_sum(tf.image.total_variation(generated_image))
+
     def total_cost(self, generated_image):
         """Calculates the total cost for the generated image.
 
@@ -235,13 +258,15 @@ class NST:
                 (1, nh, nw, 3) representing the generated image.
 
         Returns:
-            tuple: (J, J_content, J_style)
+            tuple: (J, J_content, J_style, J_var)
         """
-        target_shape = self.content_image.shape
+        nh, nw, _ = self.content_image.shape
+        expected_shape = (1, nh, nw, 3)
+
         if not isinstance(generated_image, (tf.Tensor, tf.Variable)) or \
-           generated_image.shape != target_shape:
+           generated_image.shape != expected_shape:
             raise TypeError(
-                f"generated_image must be a tensor of shape {target_shape}"
+                f"generated_image must be a tensor of shape {expected_shape}"
             )
 
         gen_preprocessed = tf.keras.applications.vgg19.preprocess_input(
@@ -254,10 +279,12 @@ class NST:
 
         J_content = self.content_cost(content_output)
         J_style = self.style_cost(style_outputs)
+        J_var = self.variational_cost(generated_image)
 
-        J = (self.alpha * J_content) + (self.beta * J_style)
+        J = (self.alpha * J_content) + (self.beta * J_style) + \
+            (self.var * J_var)
 
-        return J, J_content, J_style
+        return J, J_content, J_style, J_var
 
     def compute_grads(self, generated_image):
         """Calculates the gradients for the generated image.
@@ -267,22 +294,26 @@ class NST:
                 of shape (1, nh, nw, 3).
 
         Returns:
-            tuple: (grads, J_total, J_content, J_style)
+            tuple: (grads, J_total, J_content, J_style, J_var)
         """
-        target_shape = self.content_image.shape
+        nh, nw, _ = self.content_image.shape
+        expected_shape = (1, nh, nw, 3)
+
         if not isinstance(generated_image, (tf.Tensor, tf.Variable)) or \
-           generated_image.shape != target_shape:
+           generated_image.shape != expected_shape:
             raise TypeError(
-                f"generated_image must be a tensor of shape {target_shape}"
+                f"generated_image must be a tensor of shape {expected_shape}"
             )
 
         with tf.GradientTape() as tape:
             tape.watch(generated_image)
-            J_total, J_content, J_style = self.total_cost(generated_image)
+            J_total, J_content, J_style, J_var = self.total_cost(
+                generated_image
+            )
 
         grads = tape.gradient(J_total, generated_image)
 
-        return grads, J_total, J_content, J_style
+        return grads, J_total, J_content, J_style, J_var
 
     def generate_image(self, iterations=1000, step=None, lr=0.01,
                        beta1=0.9, beta2=0.99):
@@ -326,7 +357,9 @@ class NST:
         if beta2 < 0.0 or beta2 > 1.0:
             raise ValueError("beta2 must be in the range [0, 1]")
 
-        generated_image = tf.Variable(self.content_image)
+        init_image = tf.expand_dims(self.content_image, axis=0)
+        generated_image = tf.Variable(init_image)
+
         optimizer = tf.keras.optimizers.Adam(
             learning_rate=lr,
             beta_1=beta1,
@@ -337,20 +370,20 @@ class NST:
         best_image = None
 
         for i in range(iterations + 1):
-            grads, J_total, J_content, J_style = self.compute_grads(
+            grads, J_total, J_content, J_style, J_var = self.compute_grads(
                 generated_image
             )
 
             if J_total < best_cost:
                 best_cost = J_total
-                best_image = generated_image[0]
+                best_image = generated_image[0].numpy()
 
             if step is not None and (
                 i == 0 or i % step == 0 or i == iterations
             ):
                 print(
-                    f"Cost at iteration {i}: {J_total.numpy()}, "
-                    f"content {J_content.numpy()}, style {J_style.numpy()}"
+                    f"Cost at iteration {i}: {J_total}, content {J_content}, "
+                    f"style {J_style}, var {J_var}"
                 )
 
             if i < iterations:
