@@ -20,21 +20,29 @@ class NST:
         """Initialize Neural Style Transfer parameters and images.
 
         Args:
-            style_image (np.ndarray): Image used as style reference (h, w, 3)
-            content_image (np.ndarray): Image used as content reference (h, w, 3)
+            style_image (np.ndarray): Image used as style reference
+            content_image (np.ndarray): Image used as content reference
             alpha (float/int): Weight for content cost
             beta (float/int): Weight for style cost
         """
-        if not isinstance(style_image, np.ndarray) or style_image.ndim != 3 or style_image.shape[2] != 3:
-            raise TypeError("style_image must be a numpy.ndarray with shape (h, w, 3)")
+        if not isinstance(style_image, np.ndarray) or \
+           style_image.ndim != 3 or style_image.shape[2] != 3:
+            raise TypeError(
+                "style_image must be a numpy.ndarray with shape (h, w, 3)"
+            )
 
-        if not isinstance(content_image, np.ndarray) or content_image.ndim != 3 or content_image.shape[2] != 3:
-            raise TypeError("content_image must be a numpy.ndarray with shape (h, w, 3)")
+        if not isinstance(content_image, np.ndarray) or \
+           content_image.ndim != 3 or content_image.shape[2] != 3:
+            raise TypeError(
+                "content_image must be a numpy.ndarray with shape (h, w, 3)"
+            )
 
-        if not isinstance(alpha, (int, float)) or isinstance(alpha, bool) or alpha < 0:
+        if not isinstance(alpha, (int, float)) or \
+           isinstance(alpha, bool) or alpha < 0:
             raise TypeError("alpha must be a non-negative number")
 
-        if not isinstance(beta, (int, float)) or isinstance(beta, bool) or beta < 0:
+        if not isinstance(beta, (int, float)) or \
+           isinstance(beta, bool) or beta < 0:
             raise TypeError("beta must be a non-negative number")
 
         self.style_image = self.scale_image(style_image)
@@ -44,7 +52,7 @@ class NST:
 
     @staticmethod
     def scale_image(image):
-        """Rescales an image so its pixel values are in [0, 1] and max side is 512.
+        """Rescales image pixel values to [0, 1] with max side 512.
 
         Args:
             image (np.ndarray): Image array with shape (h, w, 3)
@@ -52,8 +60,11 @@ class NST:
         Returns:
             tf.Tensor: Scaled image tensor of shape (1, h_new, w_new, 3)
         """
-        if not isinstance(image, np.ndarray) or image.ndim != 3 or image.shape[2] != 3:
-            raise TypeError("image must be a numpy.ndarray with shape (h, w, 3)")
+        if not isinstance(image, np.ndarray) or \
+           image.ndim != 3 or image.shape[2] != 3:
+            raise TypeError(
+                "image must be a numpy.ndarray with shape (h, w, 3)"
+            )
 
         h, w, _ = image.shape
         if h > w:
