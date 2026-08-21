@@ -94,6 +94,7 @@ class NST:
 
         x = vgg.input
         outputs = []
+        self.output_names = []
 
         for layer in vgg.layers[1:]:
             if isinstance(layer, tf.keras.layers.MaxPooling2D):
@@ -108,6 +109,7 @@ class NST:
             if layer.name in self.style_layers or \
                layer.name == self.content_layer:
                 outputs.append(x)
+                self.output_names.append(layer.name)
 
         model = tf.keras.Model(inputs=vgg.input, outputs=outputs)
         model.trainable = False
@@ -144,13 +146,17 @@ class NST:
             self.content_image * 255.0
         )
 
-        style_outputs = self.model(style_preprocessed)[:len(self.style_layers)]
-        content_output = self.model(content_preprocessed)[-1]
+        style_outputs = self.model(style_preprocessed)
+        content_outputs = self.model(content_preprocessed)
+
+        outputs_dict_style = dict(zip(self.output_names, style_outputs))
+        outputs_dict_content = dict(zip(self.output_names, content_outputs))
 
         self.gram_style_features = [
-            self.gram_matrix(layer) for layer in style_outputs
+            self.gram_matrix(outputs_dict_style[layer])
+            for layer in self.style_layers
         ]
-        self.content_feature = content_output
+        self.content_feature = outputs_dict_content[self.content_layer]
 
     def layer_style_cost(self, style_output, gram_target):
         """Calculates the style cost for a single layer.
@@ -172,8 +178,7 @@ class NST:
         if not isinstance(gram_target, (tf.Tensor, tf.Variable)) or \
            gram_target.shape != (1, c, c):
             raise TypeError(
-                f"gram_target must be a tensor of shape [1, {c}, {c}] "
-                f"where {{c}} is the number of channels in style_output"
+                f"gram_target must be a tensor of shape [1, {c}, {c}]"
             )
 
         gram_style = self.gram_matrix(style_output)
