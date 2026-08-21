@@ -194,14 +194,13 @@ class NST:
         Returns:
             tf.Tensor: Total style cost scalar.
         """
-        num_layers = len(self.style_layers)
-        if not isinstance(style_outputs, list) or \
-           len(style_outputs) != num_layers:
+        l = len(self.style_layers)
+        if not isinstance(style_outputs, list) or len(style_outputs) != l:
             raise TypeError(
-                f"style_outputs must be a list with a length of {num_layers}"
+                f"style_outputs must be a list with a length of {l}"
             )
 
-        weight = 1.0 / num_layers
+        weight = 1.0 / l
         total_style_cost = 0.0
 
         for style_output, gram_target in zip(
@@ -211,3 +210,22 @@ class NST:
             total_style_cost += weight * cost
 
         return total_style_cost
+
+    def content_cost(self, content_output):
+        """Calculates the content cost for the generated image.
+
+        Args:
+            content_output (tf.Tensor|tf.Variable): Content output tensor for
+                the generated image.
+
+        Returns:
+            tf.Tensor: Content cost scalar.
+        """
+        s = self.content_feature.shape
+        if not isinstance(content_output, (tf.Tensor, tf.Variable)) or \
+           content_output.shape != s:
+            raise TypeError(
+                f"content_output must be a tensor of shape {s}"
+            )
+
+        return tf.reduce_mean(tf.square(content_output - self.content_feature))
