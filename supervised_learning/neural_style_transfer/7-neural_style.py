@@ -222,12 +222,46 @@ class NST:
         Returns:
             tf.Tensor: Content cost scalar.
         """
-        target_shape = self.content_feature.shape
+        s = self.content_feature.shape
         if not isinstance(content_output, (tf.Tensor, tf.Variable)) or \
-           content_output.shape != target_shape:
+           content_output.shape != s:
             raise TypeError(
-                f"content_output must be a tensor of shape {target_shape}"
+                f"content_output must be a tensor of shape {s}"
             )
 
-        diff = content_output - self.content_feature
-        return tf.reduce_mean(tf.square(diff)) / 2.0
+        return tf.reduce_mean(tf.square(content_output - self.content_feature))
+
+    def total_cost(self, generated_image):
+        """Calculates the total cost for the generated image.
+
+        Args:
+            generated_image (tf.Tensor|tf.Variable): Tensor of shape
+                (1, nh, nw, 3) representing the generated image.
+
+        Returns:
+            tuple: (J, J_content, J_style)
+        """
+        s = self.content_image.shape
+        if not isinstance(generated_image, (tf.Tensor, tf.Variable)) or \
+           generated_image.shape != s:
+            raise TypeError(
+                f"generated_image must be a tensor of shape {s}"
+            )
+
+        gen_preprocessed = tf.keras.applications.vgg19.preprocess_input(
+            generated_image * 255.0
+        )
+        gen_outputs = self.model(gen_preprocessed)
+        outputs_dict = dict(zip(self.output_names, gen_outputs))
+
+        style_outputs = [
+            outputs_dict[layer] for layer in self.style_layers
+        ]
+        content_output = outputs_dict[self.content_layer]
+
+        J_content = self.content_cost(content_output)
+        J_style = self.style_cost(style_outputs)
+
+        J = (self.alpha * J_content) + (self.beta * J_style)
+
+        return J, J_content, J_style
