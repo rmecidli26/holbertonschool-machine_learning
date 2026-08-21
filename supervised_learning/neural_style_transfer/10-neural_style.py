@@ -52,9 +52,9 @@ class NST:
 
         self.style_image = self.scale_image(style_image)
         self.content_image = self.scale_image(content_image)
-        self.alpha = alpha
-        self.beta = beta
-        self.var = var
+        self.alpha = float(alpha)
+        self.beta = float(beta)
+        self.var = float(var)
         self.load_model()
         self.generate_features()
 
@@ -239,11 +239,15 @@ class NST:
 
         Args:
             generated_image (tf.Tensor|tf.Variable): Generated image tensor of
-                shape (1, nh, nw, 3).
+                shape (1, nh, nw, 3) or (nh, nw, 3).
 
         Returns:
             tf.Tensor: Variational cost scalar.
         """
+        if not isinstance(generated_image, (tf.Tensor, tf.Variable)) or \
+           generated_image.shape.ndims not in (3, 4):
+            raise TypeError("image must be a tensor of rank 3 or 4")
+
         return tf.reduce_sum(tf.image.total_variation(generated_image))
 
     def total_cost(self, generated_image):
@@ -329,7 +333,7 @@ class NST:
         if step is not None:
             if not isinstance(step, int) or isinstance(step, bool):
                 raise TypeError("step must be an integer")
-            if step <= 0 or step > iterations:
+            if step <= 0 or step >= iterations:
                 raise ValueError(
                     "step must be positive and less than iterations"
                 )
@@ -350,6 +354,7 @@ class NST:
             raise ValueError("beta2 must be in the range [0, 1]")
 
         generated_image = tf.Variable(self.content_image)
+
         optimizer = tf.keras.optimizers.Adam(
             learning_rate=lr,
             beta_1=beta1,
@@ -364,17 +369,20 @@ class NST:
                 generated_image
             )
 
-            if J_total < best_cost:
-                best_cost = J_total
-                best_image = generated_image[0]
+            current_cost = float(J_total.numpy())
+
+            if current_cost < best_cost:
+                best_cost = current_cost
+                best_image = generated_image[0].numpy()
 
             if step is not None and (
                 i == 0 or i % step == 0 or i == iterations
             ):
                 print(
-                    f"Cost at iteration {i}: {J_total.numpy()}, "
-                    f"content {J_content.numpy()}, style {J_style.numpy()}, "
-                    f"var {J_var.numpy()}"
+                    f"Cost at iteration {i}: {current_cost}, "
+                    f"content {float(J_content.numpy())}, "
+                    f"style {float(J_style.numpy())}, "
+                    f"var {float(J_var.numpy())}"
                 )
 
             if i < iterations:
@@ -382,4 +390,4 @@ class NST:
                 clipped = tf.clip_by_value(generated_image, 0.0, 1.0)
                 generated_image.assign(clipped)
 
-        return best_image, best_cost
+        return best_image, float(best_cost)
