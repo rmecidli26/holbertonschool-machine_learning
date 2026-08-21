@@ -365,16 +365,20 @@ class NST:
                 generated_image
             )
 
-            if J_total < best_cost:
-                best_cost = J_total
+            current_cost = float(J_total.numpy())
+
+            if current_cost < best_cost:
+                best_cost = current_cost
                 best_image = generated_image[0].numpy()
 
             if step is not None and (
                 i == 0 or i % step == 0 or i == iterations
             ):
                 print(
-                    f"Cost at iteration {i}: {J_total}, content {J_content}, "
-                    f"style {J_style}, var {J_var}"
+                    f"Cost at iteration {i}: {current_cost}, "
+                    f"content {float(J_content.numpy())}, "
+                    f"style {float(J_style.numpy())}, "
+                    f"var {float(J_var.numpy())}"
                 )
 
             if i < iterations:
@@ -382,4 +386,4 @@ class NST:
                 clipped = tf.clip_by_value(generated_image, 0.0, 1.0)
                 generated_image.assign(clipped)
 
-        return best_image, best_cost
+        return best_image, float(best_cost)
