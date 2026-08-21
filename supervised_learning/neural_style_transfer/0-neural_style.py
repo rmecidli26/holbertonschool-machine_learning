@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Neural Style Transfer module"""
-
-import tensorflow as tf
+"""Neural Style Transfer Class Module."""
 import numpy as np
+import tensorflow as tf
 
 
 class NST:
-    """NST class for Neural Style Transfer"""
+    """Performs tasks for Neural Style Transfer."""
 
     style_layers = [
         'block1_conv1',
@@ -18,73 +17,57 @@ class NST:
     content_layer = 'block5_conv2'
 
     def __init__(self, style_image, content_image, alpha=1e4, beta=1):
-        """
-        Class constructor for NST
+        """Initialize Neural Style Transfer parameters and images.
 
-        parameters:
-            style_image: numpy.ndarray of shape (h, w, 3)
-            content_image: numpy.ndarray of shape (h, w, 3)
-            alpha: weight for content cost
-            beta: weight for style cost
+        Args:
+            style_image (np.ndarray): Image used as style reference (h, w, 3)
+            content_image (np.ndarray): Image used as content reference (h, w, 3)
+            alpha (float/int): Weight for content cost
+            beta (float/int): Weight for style cost
         """
         if not isinstance(style_image, np.ndarray) or style_image.ndim != 3 or style_image.shape[2] != 3:
-            raise TypeError(
-                "style_image must be a numpy.ndarray with shape (h, w, 3)"
-            )
-        if not isinstance(content_image, np.ndarray) or content_image.ndim != 3 or content_image.shape[2] != 3:
-            raise TypeError(
-                "content_image must be a numpy.ndarray with shape (h, w, 3)"
-            )
+            raise TypeError("style_image must be a numpy.ndarray with shape (h, w, 3)")
 
-        if not isinstance(alpha, (int, float)) or alpha < 0:
+        if not isinstance(content_image, np.ndarray) or content_image.ndim != 3 or content_image.shape[2] != 3:
+            raise TypeError("content_image must be a numpy.ndarray with shape (h, w, 3)")
+
+        if not isinstance(alpha, (int, float)) or isinstance(alpha, bool) or alpha < 0:
             raise TypeError("alpha must be a non-negative number")
-        if not isinstance(beta, (int, float)) or beta < 0:
+
+        if not isinstance(beta, (int, float)) or isinstance(beta, bool) or beta < 0:
             raise TypeError("beta must be a non-negative number")
 
         self.style_image = self.scale_image(style_image)
         self.content_image = self.scale_image(content_image)
-        self.alpha = float(alpha)
-        self.beta = float(beta)
+        self.alpha = alpha
+        self.beta = beta
 
     @staticmethod
     def scale_image(image):
-        """
-        Rescales an image such that its pixels values are between 0 and 1
-        and its largest side is 512 pixels.
+        """Rescales an image so its pixel values are in [0, 1] and max side is 512.
 
-        parameters:
-            image: a numpy.ndarray of shape (h, w, 3) containing the image
+        Args:
+            image (np.ndarray): Image array with shape (h, w, 3)
 
-        returns:
-            the scaled image as a tf.tensor of shape (1, h_new, w_new, 3)
+        Returns:
+            tf.Tensor: Scaled image tensor of shape (1, h_new, w_new, 3)
         """
         if not isinstance(image, np.ndarray) or image.ndim != 3 or image.shape[2] != 3:
-            raise TypeError(
-                "image must be a numpy.ndarray with shape (h, w, 3)"
-            )
+            raise TypeError("image must be a numpy.ndarray with shape (h, w, 3)")
 
         h, w, _ = image.shape
-        max_dim = 512
-
         if h > w:
-            h_new = max_dim
-            w_new = int(round(w * max_dim / h))
+            h_new = 512
+            w_new = int(w * (512 / h))
         else:
-            w_new = max_dim
-            h_new = int(round(h * max_dim / w))
+            w_new = 512
+            h_new = int(h * (512 / w))
 
-        # Convert image to float32 tensor and add batch dimension
-        image_tensor = tf.convert_to_tensor(image, dtype=tf.float32)
-        image_tensor = tf.expand_dims(image_tensor, axis=0)
-
-        # Resize using bicubic interpolation
-        scaled_image = tf.image.resize(
-            image_tensor, [h_new, w_new],
+        image = tf.expand_dims(image, axis=0)
+        resized_image = tf.image.resize(
+            image,
+            size=[h_new, w_new],
             method=tf.image.ResizeMethod.BICUBIC
         )
-
-        # Rescale pixel values from [0, 255] to [0, 1] and clip
-        scaled_image = scaled_image / 255.0
-        scaled_image = tf.clip_by_value(scaled_image, 0.0, 1.0)
-
-        return scaled_image
+        scaled_image = resized_image / 255.0
+        return tf.clip_by_value(scaled_image, 0.0, 1.0)
