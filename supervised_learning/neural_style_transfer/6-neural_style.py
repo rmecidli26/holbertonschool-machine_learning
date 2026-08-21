@@ -93,8 +93,7 @@ class NST:
         )
 
         x = vgg.input
-        outputs = []
-        self.output_names = []
+        outputs_dict = {}
 
         for layer in vgg.layers[1:]:
             if isinstance(layer, tf.keras.layers.MaxPooling2D):
@@ -106,10 +105,10 @@ class NST:
                 )
             layer.trainable = False
             x = layer(x)
-            if layer.name in self.style_layers or \
-               layer.name == self.content_layer:
-                outputs.append(x)
-                self.output_names.append(layer.name)
+            outputs_dict[layer.name] = x
+
+        outputs = [outputs_dict[layer] for layer in self.style_layers]
+        outputs.append(outputs_dict[self.content_layer])
 
         model = tf.keras.Model(inputs=vgg.input, outputs=outputs)
         model.trainable = False
@@ -149,14 +148,11 @@ class NST:
         style_outputs = self.model(style_preprocessed)
         content_outputs = self.model(content_preprocessed)
 
-        outputs_dict_style = dict(zip(self.output_names, style_outputs))
-        outputs_dict_content = dict(zip(self.output_names, content_outputs))
-
         self.gram_style_features = [
-            self.gram_matrix(outputs_dict_style[layer])
-            for layer in self.style_layers
+            self.gram_matrix(style_outputs[i])
+            for i in range(len(self.style_layers))
         ]
-        self.content_feature = outputs_dict_content[self.content_layer]
+        self.content_feature = content_outputs[-1]
 
     def layer_style_cost(self, style_output, gram_target):
         """Calculates the style cost for a single layer.
