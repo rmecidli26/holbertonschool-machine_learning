@@ -21,8 +21,8 @@ class GaussianProcess:
         using the Radial Basis Function (RBF).
         """
         sqdist = (
-            np.sum(X1 ** 2, axis=1, keepdims=True) +
-            np.sum(X2 ** 2, axis=1) -
-            2 * np.dot(X1, X2.T)
+            np.sum(X1 ** 2, axis=1, keepdims=True)
+            + np.sum(X2 ** 2, axis=1)
+            - 2 * np.dot(X1, X2.T)
         )
         return (self.sigma_f ** 2) * np.exp(-0.5 / (self.l ** 2) * sqdist)
