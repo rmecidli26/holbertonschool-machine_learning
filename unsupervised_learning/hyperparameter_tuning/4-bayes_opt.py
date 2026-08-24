@@ -8,7 +8,7 @@ GP = __import__('2-gp').GaussianProcess
 
 
 class BayesianOptimization:
-    """Represents a Bayesian optimization on a noiseless 1D Gaussian process."""
+    """Represents a Bayesian optimization on a 1D Gaussian process."""
 
     def __init__(self, f, X_init, Y_init, bounds, ac_samples,
                  l=1, sigma_f=1, xsi=0.01, minimize=True):
@@ -48,5 +48,5 @@ class BayesianOptimization:
         EI[mask] = term1 + term2
 
         X_next = self.X_s[np.argmax(EI)]
-        
+
         return X_next, EI
