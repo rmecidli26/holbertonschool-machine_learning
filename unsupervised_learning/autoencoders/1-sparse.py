@@ -6,14 +6,14 @@ import tensorflow.keras as K
 
 
 def autoencoder(input_dims, hidden_layers, latent_dims, lambtha):
-    """Creates a sparse autoencoder with L1 regularization on the latent space."""
+    """Creates a sparse autoencoder with L1"""
     # --- Encoder ---
     input_enc = K.Input(shape=(input_dims,))
     x = input_enc
     for units in hidden_layers:
         x = K.layers.Dense(units, activation='relu')(x)
-    
-    # Latent qatına L1 regularizasiyası (aktivliyə görə cərimə) əlavə edilir
+
+    # Latent qatına L1 regularizasiyası (aktivliyə
     latent = K.layers.Dense(
         latent_dims,
         activation='relu',
@@ -38,7 +38,7 @@ def autoencoder(input_dims, hidden_layers, latent_dims, lambtha):
     reconstructed = decoder(latent_repr)
     auto = K.Model(auto_input, reconstructed, name='autoencoder')
 
-    # Modeli adam optimizatoru və binary_crossentropy itki funksiyası ilə kompilyasiya edirik
+    # Modeli adam optimizatoru və binary_crossentropy
     auto.compile(optimizer='adam', loss='binary_crossentropy')
 
     return encoder, decoder, auto
