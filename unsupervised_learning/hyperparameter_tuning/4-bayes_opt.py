@@ -45,5 +45,5 @@ class BayesianOptimization:
                     sigma[mask] * norm.pdf(Z[mask]))
 
         X_next = self.X_s[np.argmax(EI)]
-        
+
         return X_next, EI
