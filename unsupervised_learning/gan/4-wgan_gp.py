@@ -65,7 +65,7 @@ class WGAN_GP(keras.Model):
         )
 
     def replace_weights(self, gen_h5, disc_h5):
-        """Replace the weights of generator and discriminator from .h5 files."""
+        """Replace the weights of generator and files."""
         self.generator.load_weights(gen_h5)
         self.discriminator.load_weights(disc_h5)
 
