@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bayesian Optimization acquisition
+"""Bayesian Optimization acquisition implementation using a Gaussian Process.
 """
 
 import numpy as np
@@ -8,7 +8,7 @@ GP = __import__('2-gp').GaussianProcess
 
 
 class BayesianOptimization:
-    """Represents a Bayesian optimization on a noiseless"""
+    """Represents a Bayesian optimization on a noiseless 1D Gaussian process."""
 
     def __init__(self, f, X_init, Y_init, bounds, ac_samples,
                  l=1, sigma_f=1, xsi=0.01, minimize=True):
@@ -36,14 +36,17 @@ class BayesianOptimization:
         Z = np.zeros_like(mu)
         EI = np.zeros_like(mu)
 
-        # Sıfıra bölünmənin və ya riyazi xətaları
+        # Sıfıra bölünmənin və ya riyazi xətaların qarşısını almaq üçün maska
         mask = sigma > 0
 
-        # Z və EI dəyərlərinin sadəcə etibarlı
+        # Z dəyərinin sadəcə etibarlı dispersiya olduqda hesablanması
         Z[mask] = improvement[mask] / sigma[mask]
-        EI[mask] = (improvement[mask] * norm.cdf(Z[mask]) +
-                    sigma[mask] * norm.pdf(Z[mask]))
+
+        # W503/W504 xətalarından qaçmaq üçün riyazi ifadə iki hissəyə bölünür
+        term1 = improvement[mask] * norm.cdf(Z[mask])
+        term2 = sigma[mask] * norm.pdf(Z[mask])
+        EI[mask] = term1 + term2
 
         X_next = self.X_s[np.argmax(EI)]
-
+        
         return X_next, EI
