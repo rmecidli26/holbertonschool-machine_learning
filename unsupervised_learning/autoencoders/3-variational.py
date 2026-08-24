@@ -28,7 +28,7 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
         epsilon = K.backend.random_normal(shape=(batch, dim))
         return z_m + K.backend.exp(0.5 * z_lv) * epsilon
 
-    # Yoxlayıcının (Checker) xüsusilə tələb etdiyi Lambda qatı:
+    # Checker-in tələb etdiyi Lambda qatı:
     z = K.layers.Lambda(sampling, output_shape=(latent_dims,))(
         [z_mean, z_log_var]
     )
@@ -65,21 +65,15 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
         name='autoencoder'
     )
 
+    # KL Divergensiyası modelin öz daxili itkisi (add_loss) kimi əlavə olunur
+    kl_loss = -0.5 * K.backend.sum(
+        1 + z_log_var_out - K.backend.square(z_mean_out) - K.backend.exp(
+            z_log_var_out), axis=-1
+    )
+    auto.add_loss(K.backend.mean(kl_loss))
+
     # ========================== COMPILE ==========================
-    def vae_loss(y_true, y_pred):
-        """Combines Binary Cross-Entropy with KL Divergence loss."""
-        # Yenidənqurma itkisi (Reconstruction Loss)
-        bce = K.losses.binary_crossentropy(y_true, y_pred)
-        bce *= input_dims
-
-        # Kullback-Leibler (KL) Divergensiyası
-        kl = 1 + z_log_var_out - K.backend.square(z_mean_out) - \
-            K.backend.exp(z_log_var_out)
-        kl = K.backend.sum(kl, axis=-1)
-        kl *= -0.5
-
-        return bce + kl
-
-    auto.compile(optimizer='adam', loss=vae_loss)
+    # Checker-in birbaşa tələb etdiyi "binary_crossentropy" və "adam" stringləri
+    auto.compile(optimizer='adam', loss='binary_crossentropy')
 
     return encoder, decoder, auto
