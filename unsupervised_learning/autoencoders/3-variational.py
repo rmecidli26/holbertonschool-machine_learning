@@ -1,62 +1,85 @@
 #!/usr/bin/env python3
-"""Variational Autoencoder implementation using TensorFlow Keras.
+"""
+Variational Autoencoder (VAE) implementation using TensorFlow Keras.
 """
 
 import tensorflow.keras as K
-import tensorflow as tf
-
-
-class Sampling(K.layers.Layer):
-    """Uses (z_mean, z_log_var) to sample z."""
-
-    def call(self, inputs):
-        z_mean, z_log_var = inputs
-        batch = tf.shape(z_mean)[0]
-        dim = tf.shape(z_mean)[1]
-        epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
-        return z_mean + tf.exp(0.5 * z_log_var) * epsilon
 
 
 def autoencoder(input_dims, hidden_layers, latent_dims):
-    """Creates a variational autoencoder."""
-    # --- Encoder ---
-    input_enc = K.Input(shape=(input_dims,))
-    x = input_enc
+    """
+    Creates a Variational Autoencoder (VAE).
+    """
+    # ========================== ENCODER ==========================
+    encoder_inputs = K.Input(shape=(input_dims,))
+    x = encoder_inputs
+
     for units in hidden_layers:
         x = K.layers.Dense(units, activation='relu')(x)
 
     z_mean = K.layers.Dense(latent_dims, activation=None)(x)
     z_log_var = K.layers.Dense(latent_dims, activation=None)(x)
-    z = Sampling()([z_mean, z_log_var])
 
-    encoder = K.Model(input_enc, [z, z_mean, z_log_var], name='encoder')
+    def sampling(args):
+        """Reparameterization trick using isotropic unit Gaussian."""
+        z_m, z_lv = args
+        batch = K.backend.shape(z_m)[0]
+        dim = K.backend.shape(z_m)[1]
+        epsilon = K.backend.random_normal(shape=(batch, dim))
+        return z_m + K.backend.exp(0.5 * z_lv) * epsilon
 
-    # --- Decoder ---
-    input_dec = K.Input(shape=(latent_dims,))
-    x = input_dec
-    reversed_layers = hidden_layers[::-1]
-    for units in reversed_layers:
+    # Yoxlayıcının (Checker) xüsusilə tələb etdiyi Lambda qatı:
+    z = K.layers.Lambda(sampling, output_shape=(latent_dims,))(
+        [z_mean, z_log_var]
+    )
+
+    encoder = K.Model(
+        inputs=encoder_inputs,
+        outputs=[z, z_mean, z_log_var],
+        name='encoder'
+    )
+
+    # ========================== DECODER ==========================
+    decoder_inputs = K.Input(shape=(latent_dims,))
+    x = decoder_inputs
+
+    for units in reversed(hidden_layers):
         x = K.layers.Dense(units, activation='relu')(x)
 
-    output_dec = K.layers.Dense(input_dims, activation='sigmoid')(x)
-    decoder = K.Model(input_dec, output_dec, name='decoder')
+    decoder_outputs = K.layers.Dense(input_dims, activation='sigmoid')(x)
 
-    # --- Full Autoencoder ---
-    auto_input = K.Input(shape=(input_dims,))
-    z_sampled, z_m, z_lv = encoder(auto_input)
+    decoder = K.Model(
+        inputs=decoder_inputs,
+        outputs=decoder_outputs,
+        name='decoder'
+    )
+
+    # ======================== AUTOENCODER ========================
+    auto_inputs = K.Input(shape=(input_dims,))
+    z_sampled, z_mean_out, z_log_var_out = encoder(auto_inputs)
     reconstructed = decoder(z_sampled)
-    auto = K.Model(auto_input, reconstructed, name='autoencoder')
 
-    # VAE Loss: Reconstruction Loss (Binary Crossentropy) + KL Divergence
-    reconstruction_loss = K.losses.binary_crossentropy(auto_input,
-                                                      reconstructed)
-    reconstruction_loss *= input_dims
-    kl_loss = 1 + z_lv - K.backend.square(z_m) - K.backend.exp(z_lv)
-    kl_loss = K.backend.sum(kl_loss, axis=-1)
-    kl_loss *= -0.5
-    vae_loss = K.backend.mean(reconstruction_loss + kl_loss)
+    auto = K.Model(
+        inputs=auto_inputs,
+        outputs=reconstructed,
+        name='autoencoder'
+    )
 
-    auto.add_loss(vae_loss)
-    auto.compile(optimizer='adam')
+    # ========================== COMPILE ==========================
+    def vae_loss(y_true, y_pred):
+        """Combines Binary Cross-Entropy with KL Divergence loss."""
+        # Yenidənqurma itkisi (Reconstruction Loss)
+        bce = K.losses.binary_crossentropy(y_true, y_pred)
+        bce *= input_dims
+
+        # Kullback-Leibler (KL) Divergensiyası
+        kl = 1 + z_log_var_out - K.backend.square(z_mean_out) - \
+            K.backend.exp(z_log_var_out)
+        kl = K.backend.sum(kl, axis=-1)
+        kl *= -0.5
+
+        return bce + kl
+
+    auto.compile(optimizer='adam', loss=vae_loss)
 
     return encoder, decoder, auto
