@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Wasserstein GAN with weight clipping implementation using TensorFlow and Keras."""
+"""Wasserstein GAN with weight clipping implementation
+using TensorFlow and Keras.
+"""
 
 import tensorflow as tf
 from tensorflow import keras
@@ -24,7 +26,8 @@ class WGAN_clip(keras.Model):
         self.beta_1 = 0.5
         self.beta_2 = 0.9
 
-        # Define generator loss and optimizer: opposite of the mean discriminator output on fake samples
+        # Define generator loss and optimizer: opposite of the
+        # mean discriminator output on fake samples
         self.generator.loss = lambda x: -tf.math.reduce_mean(x)
         self.generator.optimizer = keras.optimizers.Adam(
             learning_rate=self.learning_rate,
@@ -36,16 +39,19 @@ class WGAN_clip(keras.Model):
             loss=generator.loss
         )
 
-        # Define discriminator loss and optimizer: mean(disc(fake)) - mean(disc(real))
-        self.discriminator.loss = lambda x, y: tf.math.reduce_mean(x) - tf.math.reduce_mean(y)
+        # Define discriminator loss and optimizer:
+        # mean(disc(fake)) - mean(disc(real))
+        self.discriminator.loss = lambda x, y: (
+            tf.math.reduce_mean(x) - tf.math.reduce_mean(y)
+        )
         self.discriminator.optimizer = keras.optimizers.Adam(
             learning_rate=self.learning_rate,
             beta_1=self.beta_1,
             beta_2=self.beta_2
         )
         self.discriminator.compile(
-            optimizer=discriminator.optimizer,
-            loss=discriminator.loss
+            optimizer=generator.optimizer,
+            loss=self.discriminator.loss
         )
 
     def get_fake_sample(self, size=None, training=False):
