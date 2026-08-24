@@ -15,17 +15,16 @@ class BayesianOptimization:
         """Initialize the Bayesian Optimization."""
         self.f = f
         self.gp = GP(X_init, Y_init, l=l, sigma_f=sigma_f)
-        self.X_s = np.linspace(bounds[0], bounds[1], ac_samples).reshape(-1, 1)
+        self.X_s = np.linspace(bounds[0], bounds[1],
+                               ac_samples).reshape(-1, 1)
         self.xsi = xsi
         self.minimize = minimize
 
     def acquisition(self):
-        """Calculate the next best sample location using Expected Improvement."""
+        """Calculate the next best sample location
+        using Expected Improvement (EI).
+        """
         mu, sigma = self.gp.predict(self.X_s)
-        
-        # Standard deviation qrafikində mənfi və ya sıfır qiymətlərin qarşısını almaq
-        sigma = np.maximum(sigma, 1e-9)
-        sigma_sig = np.sqrt(sigma)
 
         if self.minimize:
             current_optimum = np.min(self.gp.Y)
@@ -34,11 +33,17 @@ class BayesianOptimization:
             current_optimum = np.max(self.gp.Y)
             improvement = mu - current_optimum - self.xsi
 
-        Z = improvement / sigma_sig
-        EI = improvement * norm.cdf(Z) + sigma_sig * norm.pdf(Z)
+        Z = np.zeros_like(mu)
+        EI = np.zeros_like(mu)
 
-        # Standart kənarlaşma sıfır olduqda EI-ni sıfırlamaq
-        EI[sigma_sig == 0.0] = 0.0
+        # Sıfıra bölünmənin və ya riyazi xətaların qarşısını almaq üçün maska
+        mask = sigma > 0
+
+        # Z və EI dəyərlərinin sadəcə etibarlı dispersiya olduqda hesablanması
+        Z[mask] = improvement[mask] / sigma[mask]
+        EI[mask] = (improvement[mask] * norm.cdf(Z[mask]) +
+                    sigma[mask] * norm.pdf(Z[mask]))
 
         X_next = self.X_s[np.argmax(EI)]
+        
         return X_next, EI
