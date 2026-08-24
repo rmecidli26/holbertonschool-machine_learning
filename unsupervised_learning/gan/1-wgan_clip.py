@@ -35,8 +35,8 @@ class WGAN_clip(keras.Model):
             beta_2=self.beta_2
         )
         self.generator.compile(
-            optimizer=generator.optimizer,
-            loss=generator.loss
+            optimizer=self.generator.optimizer,
+            loss=self.generator.loss
         )
 
         # Define discriminator loss and optimizer:
@@ -50,7 +50,7 @@ class WGAN_clip(keras.Model):
             beta_2=self.beta_2
         )
         self.discriminator.compile(
-            optimizer=generator.optimizer,
+            optimizer=self.discriminator.optimizer,
             loss=self.discriminator.loss
         )
 
@@ -74,10 +74,10 @@ class WGAN_clip(keras.Model):
             with tf.GradientTape() as tape:
                 real_sample = self.get_real_sample()
                 fake_sample = self.get_fake_sample(training=True)
-                discr_loss = self.discriminator.loss(
-                    self.discriminator(fake_sample, training=True),
-                    self.discriminator(real_sample, training=True)
-                )
+                disc_real = self.discriminator(real_sample, training=True)
+                disc_fake = self.discriminator(fake_sample, training=True)
+                discr_loss = self.discriminator.loss(disc_fake, disc_real)
+
             grads = tape.gradient(
                 discr_loss, self.discriminator.trainable_variables
             )
@@ -91,9 +91,9 @@ class WGAN_clip(keras.Model):
 
         with tf.GradientTape() as tape:
             fake_sample = self.get_fake_sample(training=True)
-            gen_loss = self.generator.loss(
-                self.discriminator(fake_sample, training=True)
-            )
+            disc_fake = self.discriminator(fake_sample, training=True)
+            gen_loss = self.generator.loss(disc_fake)
+
         grads = tape.gradient(gen_loss, self.generator.trainable_variables)
         self.generator.optimizer.apply_gradients(
             zip(grads, self.generator.trainable_variables)
