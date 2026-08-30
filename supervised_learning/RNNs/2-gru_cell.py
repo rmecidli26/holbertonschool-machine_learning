@@ -38,19 +38,18 @@ class GRUCell:
             h_next (numpy.ndarray): Next hidden state
             y (numpy.ndarray): Output of the cell
         """
-        # Concatenate x_t and h_prev along columns (axis 1)
-        concated = np.concatenate((x_t, h_prev), axis=1)
+        # Concatenate h_prev and x_t (Hidden state must come first)
+        concat = np.concatenate((h_prev, x_t), axis=1)
 
-        # Update gate: z_t = sigmoid(concated @ Wz + bz)
-        z_t = 1 / (1 + np.exp(-(concated @ self.Wz + self.bz)))
+        # Update gate: z_t = sigmoid(concat @ Wz + bz)
+        z_t = 1 / (1 + np.exp(-(concat @ self.Wz + self.bz)))
 
-        # Reset gate: r_t = sigmoid(concated @ Wr + br)
-        r_t = 1 / (1 + np.exp(-(concated @ self.Wr + self.br)))
+        # Reset gate: r_t = sigmoid(concat @ Wr + br)
+        r_t = 1 / (1 + np.exp(-(concat @ self.Wr + self.br)))
 
-        # Candidate hidden state: h_tilde = tanh(x_t @ Wh_x + (r_t * h_prev) @ Wh_h + bh)
-        # Equivalent using combined concatenation:
-        concated_reset = np.concatenate((x_t, r_t * h_prev), axis=1)
-        h_tilde = np.tanh(concated_reset @ self.Wh + self.bh)
+        # Candidate hidden state: h_tilde = tanh([r_t * h_prev, x_t] @ Wh + bh)
+        concat_reset = np.concatenate((r_t * h_prev, x_t), axis=1)
+        h_tilde = np.tanh(concat_reset @ self.Wh + self.bh)
 
         # Next hidden state: h_next = (1 - z_t) * h_prev + z_t * h_tilde
         h_next = (1 - z_t) * h_prev + z_t * h_tilde
