@@ -22,7 +22,7 @@ def deep_rnn(rnn_cells, X, h_0):
         for layer in range(l):
             cell = rnn_cells[layer]
             h_prev = H[step, layer]
-            # For the first layer, input is x_current; for subsequent layers, it's the hidden state of the layer below
+            # For the first layer,e of the layer below
             if layer == 0:
                 h_next, y = cell.forward(h_prev, x_current)
             else:
