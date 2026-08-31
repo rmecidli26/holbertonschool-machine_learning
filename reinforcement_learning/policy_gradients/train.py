@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Module to implement Monte Carlo policy gradient training for CartPole."""
+"""Module to implement Monte Carlo policy gradient training with rendering."""
 
 import numpy as np
 
 policy_gradient = __import__('policy_gradient').policy_gradient
 
 
-def train(env, nb_episodes, alpha=0.000045, gamma=0.98):
+def train(env, nb_episodes, alpha=0.000045, gamma=0.98, show_result=False):
     """Implements full policy gradient training over specified episodes.
 
     Args:
@@ -14,6 +14,7 @@ def train(env, nb_episodes, alpha=0.000045, gamma=0.98):
         nb_episodes: Number of episodes used for training.
         alpha: Learning rate.
         gamma: Discount factor.
+        show_result: Boolean, whether to render the environment every 1000 ep.
 
     Returns:
         scores: List containing total rewards (scores) earned per episode.
@@ -28,6 +29,9 @@ def train(env, nb_episodes, alpha=0.000045, gamma=0.98):
         score = 0.0
 
         while True:
+            if show_result and episode % 1000 == 0:
+                env.render()
+
             action, grad = policy_gradient(state, weight)
             next_state, reward, terminated, truncated, _ = env.step(action)
 
