@@ -23,31 +23,32 @@ def monte_carlo(
     """
     for episode in range(episodes):
         state, _ = env.reset()
-        episode_data = []
+        states = []
+        rewards = []
 
         for step in range(max_steps):
             action = policy(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
-            episode_data.append((state, action, reward))
+
+            # Quyuya düşəndə reward 0-dırsa, -1 kimi nəzərə alınır
+            if terminated and reward == 0:
+                reward = -1
+
+            states.append(state)
+            rewards.append(reward)
             state = next_state
 
             if terminated or truncated:
                 break
 
-        # Calculate returns
         G = 0
-        returns = []
-        for s, a, r in reversed(episode_data):
-            G = gamma * G + r
-            returns.append((s, G))
-
-        returns.reverse()
-
-        # First-Visit MC update
         visited = set()
-        for s, G in returns:
-            if s not in visited:
+        # Arxadan qabağa hesablama (First-Visit MC)
+        for t in range(len(states) - 1, -1, -1):
+            s = states[t]
+            G = gamma * G + rewards[t]
+
+            if s not in states[:t]:
                 V[s] = V[s] + alpha * (G - V[s])
-                visited.add(s)
 
     return V
