@@ -2,7 +2,6 @@
 """Module to create a Bag of Words embedding matrix."""
 
 import numpy as np
-import re
 
 
 def bag_of_words(sentences, vocab=None):
@@ -19,8 +18,13 @@ def bag_of_words(sentences, vocab=None):
     """
     tokenized_sentences = []
     for sentence in sentences:
-        # Preprocessing: convert to lower case and remove punctuation/apostrophes
-        words = re.findall(r"\b\w+\b", sentence.lower())
+        # Apostrof və s-i silmək və durğu işarələrini təmizləmək
+        clean_sentence = sentence.lower().replace("'s", "")
+        words = []
+        for word in clean_sentence.split():
+            clean_word = "".join(c for c in word if c.isalnum())
+            if clean_word:
+                words.append(clean_word)
         tokenized_sentences.append(words)
 
     if vocab is None:
