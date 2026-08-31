@@ -21,8 +21,6 @@ def monte_carlo(
     Returns:
         V: The updated value estimate.
     """
-    n_states = V.shape[0]
-
     for episode in range(episodes):
         state, _ = env.reset()
         episode_data = []
@@ -36,16 +34,10 @@ def monte_carlo(
             if terminated or truncated:
                 break
 
-        episode_data = np.array(episode_data, dtype=object)
         G = 0
-
-        # Traverse backwards through the episode
-        for t in range(len(episode_data) - 1, -1, -1):
-            s, _, r = episode_data[t]
-            G = gamma * G + r
-
-            # First-visit MC check
-            if s not in episode_data[:t, 0]:
-                V[s] = V[s] + alpha * (G - V[s])
+        # Traverse backwards through the episode (Every-Visit MC)
+        for state, action, reward in reversed(episode_data):
+            G = gamma * G + reward
+            V[state] = V[state] + alpha * (G - V[state])
 
     return V
