@@ -1,57 +1,43 @@
 #!/usr/bin/env python3
-"""Module to perform the TD(lambda) algorithm."""
-
+"""Defines the TD(lambda) algorithm for value estimation"""
 import numpy as np
 
 
-def td_lambtha(
-    env, V, policy, lambtha, episodes=5000, max_steps=100, alpha=0.1, gamma=0.99
-):
-    """Performs the TD(lambda) algorithm for policy evaluation.
+def td_lambtha(env, V, policy, lambtha, episodes=5000,
+               max_steps=100, alpha=0.1, gamma=0.99):
+    """
+    Performs the TD(lambda) algorithm
 
     Args:
-        env: Environment instance.
-        V: Numpy array of shape (s,) containing the value estimate.
-        policy: Function that takes in a state and returns next action.
-        lambtha: Eligibility trace factor.
-        episodes: Total number of episodes to train over.
-        max_steps: Maximum number of steps per episode.
-        alpha: Learning rate.
-        gamma: Discount rate.
+        env: the environment instance
+        V: numpy.ndarray of shape (s,) containing the value estimate
+        policy: function that takes in a state and returns the next
+            action to take
+        lambtha: the eligibility trace factor
+        episodes: total number of episodes to train over
+        max_steps: maximum number of steps per episode
+        alpha: the learning rate
+        gamma: the discount rate
 
     Returns:
-        V: The updated value estimate.
+        V, the updated value estimate
     """
-    n_states = V.shape[0]
-
-    for episode in range(episodes):
+    for ep in range(episodes):
         state, _ = env.reset()
-        Et = np.zeros(n_states)
+        eligibility = np.zeros_like(V)
 
         for step in range(max_steps):
             action = policy(state)
-            next_state, reward, terminated, truncated, _ = env.step(action)
+            next_state, reward, terminated, truncated, _ = env.step(
+                action)
 
-            if terminated and reward == 0:
-                reward = -1
+            delta = reward + gamma * V[next_state] - V[state]
+            eligibility[state] += 1
 
-            # Eligibility trace-i yeniləyirik
-            Et *= gamma * lambtha
-            Et[state] += 1
-
-            # Terminal vəziyyətdə növbəti state dəyəri 0 olur
-            if terminated or truncated:
-                td_target = reward
-            else:
-                td_target = reward + gamma * V[next_state]
-
-            td_error = td_target - V[state]
-
-            # V matrisini və trace-ləri yeniləyirik
-            V += alpha * td_error * Et
+            V = V + alpha * delta * eligibility
+            eligibility = gamma * lambtha * eligibility
 
             state = next_state
-
             if terminated or truncated:
                 break
 
