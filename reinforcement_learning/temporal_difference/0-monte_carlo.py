@@ -34,10 +34,20 @@ def monte_carlo(
             if terminated or truncated:
                 break
 
+        # Calculate returns
         G = 0
-        # Traverse backwards through the episode (Every-Visit MC)
-        for state, action, reward in reversed(episode_data):
-            G = gamma * G + reward
-            V[state] = V[state] + alpha * (G - V[state])
+        returns = []
+        for s, a, r in reversed(episode_data):
+            G = gamma * G + r
+            returns.append((s, G))
+
+        returns.reverse()
+
+        # First-Visit MC update
+        visited = set()
+        for s, G in returns:
+            if s not in visited:
+                V[s] = V[s] + alpha * (G - V[s])
+                visited.add(s)
 
     return V
