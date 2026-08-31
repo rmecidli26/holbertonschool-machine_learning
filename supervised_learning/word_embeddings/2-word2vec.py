@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Module to create, build, and train a Gensim Word2Vec model."""
 
-from gensim.models import Word2Vec
+import gensim
 
 
 def word2vec_model(
@@ -33,7 +33,7 @@ def word2vec_model(
     """
     sg = 0 if cbow else 1
 
-    model = Word2Vec(
+    model = gensim.models.Word2Vec(
         sentences=sentences,
         vector_size=vector_size,
         min_count=min_count,
