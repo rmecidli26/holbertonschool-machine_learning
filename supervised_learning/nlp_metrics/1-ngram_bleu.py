@@ -19,6 +19,7 @@ def ngram_bleu(references, sentence, n):
     c = len(sentence)
 
     # Find closest reference length r
+    # If tie, pick the shorter reference length
     ref_lens = [len(ref) for ref in references]
     closest_ref_len = min(ref_lens, key=lambda r: (abs(r - c), r))
 
