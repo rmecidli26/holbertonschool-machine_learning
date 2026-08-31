@@ -1,29 +1,32 @@
 #!/usr/bin/env python3
-"""Module to play an episode using a trained Q-table."""
-
+"""Has the trained agent play an episode"""
 import numpy as np
 
 
 def play(env, Q, max_steps=100):
-    """Has the trained agent play an episode in FrozenLake.
+    """Has the trained agent play an episode
 
     Args:
-        env: The FrozenLakeEnv instance.
-        Q: A numpy.ndarray containing the Q-table.
-        max_steps: Maximum number of steps in the episode.
+        env: the FrozenLakeEnv instance
+        Q: a numpy.ndarray containing the Q-table
+        max_steps: the maximum number of steps in the episode
 
     Returns:
-        total_rewards: The total rewards for the episode.
-        rendered_outputs: List of rendered outputs representing board states.
+        total_rewards, rendered_outputs
+            total_rewards: the rewards for the episode
+            rendered_outputs: a list of rendered outputs representing
+                the board state at each step
     """
-    state = env.s
-    rendered_outputs = [env.render()]
+    state, _ = env.reset()
     total_rewards = 0
+    rendered_outputs = [env.render()]
 
     for step in range(max_steps):
         action = np.argmax(Q[state])
-        state, reward, terminated, truncated, _ = env.step(action)
+        new_state, reward, terminated, truncated, info = env.step(action)
         rendered_outputs.append(env.render())
+
+        state = new_state
         total_rewards += reward
 
         if terminated or truncated:
