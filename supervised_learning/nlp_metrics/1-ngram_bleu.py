@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Module to calculate the n-gram BLEU score for a sentence."""
+"""Module to calculate the cumulative n-gram BLEU score for a sentence."""
 
 import numpy as np
 
 
-def ngram_bleu(references, sentence, n):
-    """Calculates the n-gram BLEU score for a sentence.
+def cumulative_bleu(references, sentence, n):
+    """Calculates the cumulative n-gram BLEU score for a sentence.
 
     Args:
         references: list of reference translations, each reference is a list
@@ -14,12 +14,12 @@ def ngram_bleu(references, sentence, n):
         n: size of the maximum n-gram to use for evaluation.
 
     Returns:
-        The n-gram BLEU score.
+        The cumulative n-gram BLEU score.
     """
     c = len(sentence)
 
-    # Find closest reference length r
-    # If tie, pick the shorter reference length
+    # Find closest reference length r.
+    # If there is a tie in distance abs(r - c), pick the shortest reference length
     ref_lens = [len(ref) for ref in references]
     closest_ref_len = min(ref_lens, key=lambda r: (abs(r - c), r))
 
@@ -75,8 +75,9 @@ def ngram_bleu(references, sentence, n):
     if any(p == 0 for p in precisions):
         return 0.0
 
-    # Geometric mean of precisions
-    log_precision_sum = sum(np.log(p) for p in precisions)
-    geo_mean = np.exp(log_precision_sum / n)
+    # Equal weights for geometric mean calculation
+    weights = [1 / n] * n
+    log_precision_sum = sum(w * np.log(p) for w, p in zip(weights, precisions))
+    geo_mean = np.exp(log_precision_sum)
 
     return float(bp * geo_mean)
