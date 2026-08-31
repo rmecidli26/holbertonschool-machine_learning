@@ -14,11 +14,10 @@ def bag_of_words(sentences, vocab=None):
 
     Returns:
         embeddings: numpy.ndarray of shape (s, f) containing the embeddings.
-        features: list of the features used for embeddings.
+        features: numpy.ndarray of the features used for embeddings.
     """
     tokenized_sentences = []
     for sentence in sentences:
-        # Apostrof və s-i silmək və durğu işarələrini təmizləmək
         clean_sentence = sentence.lower().replace("'s", "")
         words = []
         for word in clean_sentence.split():
@@ -46,4 +45,4 @@ def bag_of_words(sentences, vocab=None):
             if word in feature_map:
                 embeddings[i, feature_map[word]] += 1
 
-    return embeddings, features
+    return embeddings, np.array(features)
