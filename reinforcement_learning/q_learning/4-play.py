@@ -14,7 +14,7 @@ def play(env, Q, max_steps=100):
 
     Returns:
         total_rewards: The total rewards for the episode.
-        rendered_outputs: List of rendered outputs
+        rendered_outputs: List of rendered outputs representing board states.
     """
     state, _ = env.reset()
     rendered_outputs = [env.render()]
@@ -24,11 +24,10 @@ def play(env, Q, max_steps=100):
         action = np.argmax(Q[state])
 
         state, reward, terminated, truncated, _ = env.step(action)
-        total_rewards += reward
-
         rendered_outputs.append(env.render())
 
         if terminated or truncated:
+            total_rewards = reward
             break
 
     return total_rewards, rendered_outputs
