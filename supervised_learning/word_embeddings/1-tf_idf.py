@@ -42,26 +42,25 @@ def tf_idf(sentences, vocab=None):
     df = np.zeros(f, dtype=float)
 
     for i, words in enumerate(tokenized_sentences):
-        if not words:
-            continue
-        word_counts = {}
+        sentence_words = set()
         for word in words:
             if word in feature_map:
-                word_counts[word] = word_counts.get(word, 0) + 1
+                col_idx = feature_map[word]
+                tf[i, col_idx] += 1
+                sentence_words.add(col_idx)
 
-        total_words = len(words)
-        for word, count in word_counts.items():
-            col_idx = feature_map[word]
-            tf[i, col_idx] = count / total_words
-
-        for word in word_counts:
-            col_idx = feature_map[word]
+        for col_idx in sentence_words:
             df[col_idx] += 1
 
-    idf = np.log10(s / (df + 1e-16))
+    # Standard natural log IDF: ln(N / df)
+    # If df == 0, IDF remains 0 to avoid division by zero
+    idf = np.zeros(f, dtype=float)
+    nonzero_df = df > 0
+    idf[nonzero_df] = np.log(s / df[nonzero_df])
 
     tf_idf_matrix = tf * idf
 
+    # L2 Normalization per row
     norms = np.linalg.norm(tf_idf_matrix, axis=1, keepdims=True)
     embeddings = np.divide(
         tf_idf_matrix,
