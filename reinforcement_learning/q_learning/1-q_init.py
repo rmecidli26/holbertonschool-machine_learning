@@ -11,7 +11,7 @@ def q_init(env):
         env: The FrozenLakeEnv instance.
 
     Returns:
-        A numpy.ndarray of zeros with shape (action_space.n, observation_space.n).
+        A numpy.ndarray of zeros with shape (action_space.n
     """
     action_space_size = env.action_space.n
     state_space_size = env.observation_space.n
