@@ -52,8 +52,7 @@ def tf_idf(sentences, vocab=None):
         for col_idx in sentence_words:
             df[col_idx] += 1
 
-    # Standard natural log IDF: ln(N / df)
-    # If df == 0, IDF remains 0 to avoid division by zero
+    # Standard natural log without smoothing: ln(s / df)
     idf = np.zeros(f, dtype=float)
     nonzero_df = df > 0
     idf[nonzero_df] = np.log(s / df[nonzero_df])
