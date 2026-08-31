@@ -1,35 +1,34 @@
 #!/usr/bin/env python3
-"""Module to load the FrozenLake environment from Gymnasium."""
+"""Module to play an episode using a trained Q-table."""
 
-import gymnasium as gym
+import numpy as np
 
 
-def load_frozen_lake(desc=None, map_name=None, is_slippery=False):
-    """Loads the FrozenLakeEnv environment from gymnasium.
+def play(env, Q, max_steps=100):
+    """Has the trained agent play an episode in FrozenLake.
 
     Args:
-        desc: List of lists containing a custom map description.
-        map_name: String containing pre-made map name ('4x4' or '8x8').
-        is_slippery: Boolean to determine if ice is slippery.
+        env: The FrozenLakeEnv instance.
+        Q: A numpy.ndarray containing the Q-table.
+        max_steps: Maximum number of steps in the episode.
 
     Returns:
-        The gymnasium FrozenLake environment instance.
+        total_rewards: The total rewards for the episode.
+        rendered_outputs: List of rendered outputs
     """
-    if desc is None and map_name is None:
-        env = gym.make(
-            "FrozenLake-v1",
-            desc=None,
-            map_name="8x8",
-            is_slippery=is_slippery,
-            render_mode="ansi",
-        )
-    else:
-        env = gym.make(
-            "FrozenLake-v1",
-            desc=desc,
-            map_name=map_name,
-            is_slippery=is_slippery,
-            render_mode="ansi",
-        )
+    state, _ = env.reset()
+    rendered_outputs = [env.render()]
+    total_rewards = 0.0
 
-    return env
+    for step in range(max_steps):
+        action = np.argmax(Q[state])
+
+        state, reward, terminated, truncated, _ = env.step(action)
+        total_rewards += reward
+
+        rendered_outputs.append(env.render())
+
+        if terminated or truncated:
+            break
+
+    return total_rewards, rendered_outputs
