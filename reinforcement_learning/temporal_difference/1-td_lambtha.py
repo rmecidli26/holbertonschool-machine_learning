@@ -1,54 +1,52 @@
 #!/usr/bin/env python3
-"""Module to perform the TD(lambda) algorithm."""
 
 import numpy as np
 
 
-def td_lambtha(
-    env, V, policy, lambtha, episodes=5000, max_steps=100, alpha=0.1, gamma=0.99
-):
-    """Performs the TD(lambda) algorithm for policy evaluation.
+def td_lambtha(env, V, policy, lambtha, episodes=5000,
+               max_steps=100, alpha=0.1, gamma=0.99):
+    """
+    Performs the TD(lambda) algorithm.
 
     Args:
-        env: Environment instance.
-        V: Numpy array of shape (s,) containing the value estimate.
-        policy: Function that takes in a state and returns next action.
-        lambtha: Eligibility trace factor.
-        episodes: Total number of episodes to train over.
-        max_steps: Maximum number of steps per episode.
-        alpha: Learning rate.
-        gamma: Discount rate.
+        env: environment instance
+        V: numpy.ndarray of shape (s,) containing value estimates
+        policy: function that takes a state and returns an action
+        lambtha: eligibility trace factor
+        episodes: number of episodes
+        max_steps: maximum number of steps per episode
+        alpha: learning rate
+        gamma: discount rate
 
     Returns:
-        V: The updated value estimate.
+        V: updated value estimate
     """
-    n_states = V.shape[0]
-
-    for episode in range(episodes):
+    for _ in range(episodes):
         state, _ = env.reset()
-        Et = np.zeros(n_states)
+        eligibility = np.zeros_like(V)
 
-        for step in range(max_steps):
+        for _ in range(max_steps):
             action = policy(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
 
-            # Adjust reward when falling in a hole
-            if terminated and reward == 0:
-                reward = -1
+            # TD error
+            if terminated or truncated:
+                delta = reward - V[state]
+            else:
+                delta = reward + gamma * V[next_state] - V[state]
 
-            # Update eligibility trace (accumulating trace)
-            Et[state] += 1
+            # Accumulating eligibility trace
+            eligibility[state] += 1
 
-            # Temporal Difference error
-            td_error = reward + gamma * V[next_state] - V[state]
+            # Update all states
+            V += alpha * delta * eligibility
 
-            # Update value function and decay eligibility traces
-            V += alpha * td_error * Et
-            Et *= gamma * lambtha
-
-            state = next_state
+            # Decay eligibility traces
+            eligibility *= gamma * lambtha
 
             if terminated or truncated:
                 break
+
+            state = next_state
 
     return V
