@@ -43,6 +43,7 @@ def fasttext_model(
         epochs=epochs,
         seed=seed,
         workers=workers,
+        hashfxn=hash,
     )
 
     return model
